@@ -8,7 +8,7 @@ using Json.NETMF;
 
 using Gadgeteer.Modules.GHIElectronics;
 
-namespace SmartLock.Resources
+namespace SmartLock
 {
     class CacheAccess
     {

@@ -20,13 +20,6 @@ namespace SmartLock
         private const string URL = "http://localhost:8000/SmartLockRESTService/data/?id=" + GadgeteerID;
         ArrayList UserList = new ArrayList();
 
-        public class UserForLock
-        {
-            public string Pin { get; set; }
-            public string CardID { get; set; }
-            public string Expire { get; set; }
-        }
-
         private void ServerRequest()
         {
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
