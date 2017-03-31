@@ -1,8 +1,9 @@
 using System;
+using System.IO;
 using System.Collections;
 using System.Threading;
 using System.Net;
-using System.Runtime.Serialization.Json;
+using Json.NETMF;
 
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
@@ -25,24 +26,26 @@ namespace SmartLock
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
             using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
             {
-                if (response.StatusCode != HttpStatusCode.OK)
-                    throw new Exception("Server error (HTTP "+response.StatusCode+": "+response.StatusDescription+").");
-                    DataContractJsonSerializer jsonSerializer = new DataContractJsonSerializer(typeof(Response));
-                    object objResponse = jsonSerializer.ReadObject(response.GetResponseStream());
-                    Response jsonResponse = objResponse as Response;
-                    return jsonResponse;
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream response_stream = response.GetResponseStream();
+                    StreamReader response_reader = new StreamReader(response_stream);
+                    string response_string = response_reader.ReadToEnd();
+                    ArrayList UserList = JsonSerializer.DeserializeString(response_string) as ArrayList;
+                    
+                }
             }
         }
 
         private void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up!");
-            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
+            Debug.Print("Network is up!"); //debug
+            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress); //debug
         }
 
         private void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is down!");
+            Debug.Print("Network is down!"); //debug
         }
     }
 }
