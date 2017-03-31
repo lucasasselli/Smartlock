@@ -23,7 +23,7 @@ namespace SmartLock
             Display_Initialize();
 
             ethernetJ11D.UseThisNetworkInterface();
-            ethernetJ11D.UseStaticIP("192.168.100.2", "255.255.255.0", "0.0.0.0");
+            ethernetJ11D.UseDHCP();
             ethernetJ11D.NetworkUp += ethernetJ11D_NetworkUp;
             ethernetJ11D.NetworkDown += ethernetJ11D_NetworkDown;
 
