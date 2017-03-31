@@ -4,6 +4,7 @@ using System.Threading;
 
 using GHI.Glide;
 using GHI.Glide.Display;
+using Gadgeteer.Modules.GHIElectronics;
 
 namespace SmartLock
 {
