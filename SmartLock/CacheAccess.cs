@@ -4,7 +4,6 @@ using System.Text;
 using System.Collections;
 
 using Microsoft.SPOT;
-using Json.NETMF;
 
 using Gadgeteer.Modules.GHIElectronics;
 
@@ -25,26 +24,27 @@ namespace SmartLock
 
         ArrayList Load()
         {
-            FileStream f = sdCard.StorageDevice.OpenWrite(CACHE_FILE);
+            FileStream f = sdCard.StorageDevice.OpenRead(CACHE_FILE);
+            byte[] data = new byte[f.Length];
 
-            // Parse Arraylist to Json
-            string fileOutput = "";
-            userList = JsonSerializer.DeserializeString(fileOutput) as ArrayList;
+            f.Read(data, 0, data.Length);
+
+            userList = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
+
+            return userList;
         }
 
         void Store(ArrayList userList)
         {
-            
             if (userList.Count > 0) {
                 FileStream f = sdCard.StorageDevice.OpenWrite(CACHE_FILE);
 
                 // Parse Arraylist to Json
-                string json = JsonSerializer.SerializeObject(userList);
-                byte[] Data = Encoding.UTF8.GetBytes(json);
-                f.Write(Data, 0, Data.Length);
+                byte[] data = Reflection.Serialize(userList, typeof(ArrayList));
+                f.Write(data, 0, data.Length);
 
+                f.Close();
             }
         }
-
     }
 }
