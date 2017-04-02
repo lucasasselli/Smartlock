@@ -22,7 +22,7 @@ namespace SmartLock
         private static string[] fields_user_name = { "CardID", "Expire", "Pin" };
         private const string LogHeader = "Log";
         private static string[] fields_log_name = { "Type", "Pin", "CardID", "Text", "DateTime" };
-        private static ArrayList UserList;
+        private static ArrayList ReceivedUserList = new ArrayList();
 
         private void ServerRequest()
         {
@@ -37,13 +37,24 @@ namespace SmartLock
                     response_stream.Close();
                     response_reader.Close();
                     parseJsonResponse(response_string);
+                    if (ReceivedUserList.Count != 0) //if received user list != 0
+                    {
+                        int num_users = UserList.Count;
+                        foreach (UserForLock user in ReceivedUserList)
+                            UserList.Add(user); //update user list
+                        for (int i = 0; i < num_users; i++)
+                            UserList.RemoveAt(i); //in this way, userlist is never empty
+                        ReceivedUserList.Clear(); //clear received list
+                    }
+                    if (UserList.Count != 0)
+                        flagEmptyUserList = false;
                 }
             }
         }
 
-        private void ServerPOST(ArrayList Logs)
+        private void ServerPOST()
         {
-            string json_string = builtJsonRequest(Logs);
+            string json_string = builtJsonLogs(Logs);
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
             request.ContentType = "application/json; charset=utf-8";
             request.Method = "POST";
@@ -52,6 +63,7 @@ namespace SmartLock
             request_writer.Write(json_string);
             request_stream.Close();
             request_writer.Close();
+            Logs.Clear(); //clear log list
         }
 
         private void parseJsonResponse(string response_string)
@@ -67,7 +79,6 @@ namespace SmartLock
                 Debug.Print(json);
                 string[] AllowedUsers_string = json.Split('}'); //divide users
                 int UsersNumbers = AllowedUsers_string.Length - 1; //number of users
-                UserList = new ArrayList();
                 for(int i = 0; i < UsersNumbers; i++) //for every user
                 {
                     UserForLock User = new UserForLock();
@@ -109,7 +120,7 @@ namespace SmartLock
                     Debug.Print("User CardID: " + User.CardID);
                     Debug.Print("USer Expire: " + User.Expire);
                     Debug.Print("USer Pin: " + User.Pin);
-                    UserList.Add(User);
+                    ReceivedUserList.Add(User);
                 }
             }
             else
@@ -119,7 +130,7 @@ namespace SmartLock
             }
         }
 
-        private static string builtJsonRequest(ArrayList Logs) //can send multiple logs at a time
+        private static string builtJsonLogs(ArrayList Logs) //can send multiple logs at a time
         {
             string json_string = "{\""+ LogHeader +"\":[";
             foreach(Log log in Logs)
@@ -167,12 +178,20 @@ namespace SmartLock
 
         private void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
+            flagConnectionOn = true;
+            if (flagFirstConnection)
+            {
+                ServerRequest();
+                flagFirstConnection = false;
+                timerServerReq.Start();
+            }
             Debug.Print("Network is up!"); //debug
             Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress); //debug
         }
 
         private void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
+            flagConnectionOn = false;
             Debug.Print("Network is down!"); //debug
         }
     } //end class

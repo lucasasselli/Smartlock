@@ -169,17 +169,48 @@ namespace SmartLock
             {
                 tb1.Text = "Checking...";
                 tb1.Invalidate();
-
-                //TODO
-
+                if (!flagEmptyUserList)
+                {
+                    foreach (UserForLock user in UserList)
+                    {
+                        if (password.Equals(user.Pin))
+                        {
+                            flagAuthorizedAccess = true;
+                            break;
+                        }
+                    }
+                }
+                printAccessWindow(flagAuthorizedAccess);
+                Log accessLog; //create a new log
+                if (flagAuthorizedAccess)
+                {
+                    unlockDoor();
+                    accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.",
+                        DateTime.Now.ToString());
+                }
+                else
+                {
+                    accessLog = new Log(2, "Pin " + password + " inserted. Access denied.",
+                        DateTime.Now.ToString());
+                }
+                Logs.Add(accessLog); //add log to log list
+                if (flagConnectionOn)
+                    ServerPOST(); //send log
+                flagAuthorizedAccess = false; //reset flag
+                Glide.MainWindow = window; //back to main window
                 numDigits = 0;
-                password = String.Empty;
+                password = String.Empty; //clear password
                 pb1.Text = password;
                 pb1.Invalidate();
                 window.FillRect(tb1.Rect); //clear textbox
                 tb1.Text = ""; //clear textbox
                 tb1.Invalidate();
             }
+        }
+
+        private void printAccessWindow(bool flagAuthorizedAccess)
+        {
+            //TODO
         }
     }
 }
