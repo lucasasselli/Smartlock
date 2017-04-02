@@ -54,7 +54,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="CacheAccess.cs" />
-    <Compile Include="UserForLock.cs" />
+    <Compile Include="Classes.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Gadgeteer" />

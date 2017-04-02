@@ -18,8 +18,10 @@ namespace SmartLock
     {
         private const string GadgeteerID = "1";
         private const string URL = "http://localhost:8000/SmartLockRESTService/data/?id=" + GadgeteerID;
-        private const string default_header = "AllowedUsers";
-        private static string[] fields_name = { "CardID", "Expire", "Pin" };
+        private const string UserHeader = "AllowedUsers";
+        private static string[] fields_user_name = { "CardID", "Expire", "Pin" };
+        private const string LogHeader = "Log";
+        private static string[] fields_log_name = { "Type", "Pin", "CardID", "Text", "DateTime" };
         private static ArrayList UserList;
 
         private void ServerRequest()
@@ -32,10 +34,24 @@ namespace SmartLock
                     Stream response_stream = response.GetResponseStream();
                     StreamReader response_reader = new StreamReader(response_stream);
                     string response_string = response_reader.ReadToEnd();
+                    response_stream.Close();
                     response_reader.Close();
                     parseJsonResponse(response_string);
                 }
             }
+        }
+
+        private void ServerPOST(ArrayList Logs)
+        {
+            string json_string = builtJsonRequest(Logs);
+            HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
+            request.ContentType = "application/json; charset=utf-8";
+            request.Method = "POST";
+            Stream request_stream = request.GetRequestStream();
+            StreamWriter request_writer = new StreamWriter(request_stream);
+            request_writer.Write(json_string);
+            request_stream.Close();
+            request_writer.Close();
         }
 
         private void parseJsonResponse(string response_string)
@@ -43,7 +59,7 @@ namespace SmartLock
             int start_header = response_string.IndexOf('\"');
             int end_header = response_string.IndexOf('\"', start_header + 1);
             string header = response_string.Substring(start_header + 1, end_header - 2);
-            if(default_header.Equals(header))
+            if(UserHeader.Equals(header))
             {
                 string json = response_string.Substring(end_header + 3, 
                     response_string.Length - end_header - 5);
@@ -99,18 +115,53 @@ namespace SmartLock
             else
             {
                 Debug.Print("Data not recognized");
+                //TODO
             }
         }
 
-        private static void writeList(int i, string field, string field_value, UserForLock User)
+        private static string builtJsonRequest(ArrayList Logs) //can send multiple logs at a time
+        {
+            string json_string = "{\""+ LogHeader +"\":[";
+            foreach(Log log in Logs)
+            {
+                json_string = json_string + "{\""+ fields_log_name[0] +"\":";
+                switch (log.Type)
+                {
+                    case 1:
+                        json_string = json_string + log.Type.ToString() + ",\"" + 
+                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" + 
+                            fields_log_name[2] + "\":\"" + log.CardID + "\",\"" + 
+                            fields_log_name[3] + "\":\""  + log.Text + "\",\"" +
+                            fields_log_name[4] + "\":\"" + log.DateTime;
+                        break;
+                    case 2:
+                        json_string = json_string + log.Type.ToString() + ",\"" + 
+                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
+                            fields_log_name[4] + "\":\"" + log.DateTime;
+                        break;
+                    case 4:
+                        json_string = json_string + log.Type.ToString() + ",\"" + 
+                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" + 
+                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
+                            fields_log_name[4] + "\":\"" + log.DateTime;
+                        break;
+                }
+                json_string = json_string + "\"},";
+            }
+            json_string = json_string.Substring(0, json_string.Length - 1); //remove "," of last log
+            json_string = json_string + "]}";
+            return json_string;
+        }
+
+        private void writeList(int i, string field, string field_value, UserForLock User)
         {
             if (field_value.Equals("null"))
                 field_value = null;
-            if (field.Equals(fields_name[0]))
+            if (field.Equals(fields_user_name[0]))
                 User.CardID = field_value;
-            else if (field.Equals(fields_name[1]))
+            else if (field.Equals(fields_user_name[1]))
                 User.Expire = field_value;
-            else if (field.Equals(fields_name[2]))
+            else if (field.Equals(fields_user_name[2]))
                 User.Pin = field_value;
         }
 
