@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    class UserForLock
+    public class UserForLock
     {
         public string Pin { get; set; }
         public string CardID { get; set; }

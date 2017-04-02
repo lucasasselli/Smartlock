@@ -10,6 +10,7 @@ namespace SmartLock
 {
     public partial class Program
     {
+        private Window window = new Window();
         private TextBlock tb1;
         private PasswordBox pb1;
         private Image imm1;
@@ -28,6 +29,8 @@ namespace SmartLock
 
         private void Display_Initialize()
         {
+            window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window));
+            GlideTouch.Initialize();
             bt0 = (Button)window.GetChildByName("b0");
             bt1 = (Button)window.GetChildByName("b1");
             bt2 = (Button)window.GetChildByName("b2");
@@ -56,6 +59,8 @@ namespace SmartLock
             bt9.TapEvent += bt9_TapEvent;
             btdel.TapEvent += btdel_TapEvent;
             btac.TapEvent += btac_TapEvent;
+
+            Glide.MainWindow = window;
         }
 
         private void bt0_TapEvent(object sender)
@@ -164,7 +169,6 @@ namespace SmartLock
             {
                 tb1.Text = "Checking...";
                 tb1.Invalidate();
-                Thread.Sleep(5000); //debug, remove it
 
                 //TODO
 
