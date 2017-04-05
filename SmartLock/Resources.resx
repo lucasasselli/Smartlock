@@ -121,10 +121,7 @@
   <data name="NinaB" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\NinaB.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="window" xml:space="preserve">
+  <data name="PinWindow" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="screen1" Width="320" Height="240" BackColor="FFFFFF"&gt;
     &lt;Button Name="b1" X="112" Y="64" Width="32" Height="32" Alpha="255" Text="1" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
@@ -140,9 +137,11 @@
     &lt;Button Name="bdel" X="112" Y="166" Width="32" Height="32" Alpha="255" Text="DEL" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="b0" X="144" Y="166" Width="32" Height="32" Alpha="255" Text="0" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="bac" X="176" Y="166" Width="32" Height="32" Alpha="255" Text="AC" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;TextBlock Name="t1" X="0" Y="208" Width="320" Height="32" Alpha="255" Text="" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
     &lt;Image Name="imm1" X="0" Y="0" Width="32" Height="32" Alpha="255"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
+  </data>
+  <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

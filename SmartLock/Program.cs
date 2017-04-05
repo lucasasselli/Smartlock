@@ -15,6 +15,7 @@ namespace SmartLock
         private static bool flagFirstConnection; //first connection after power up
         private static bool flagAuthorizedAccess; //access authorized/denied
         private static bool flagEmptyUserList;
+        private static bool flagPendingLog; //there are logs to be sent to database
         private ArrayList UserList = new ArrayList(); //user list
         private ArrayList Logs = new ArrayList(); //log list
         private const int pswLength = 5; //password max length
@@ -29,6 +30,7 @@ namespace SmartLock
             flagFirstConnection = true;
             flagAuthorizedAccess = false;
             flagEmptyUserList = true;
+            flagPendingLog = false;
             numDigits = 0;
             Display_Initialize();
             timerServerReq = new GT.Timer(120000); //milliseconds -> 2 min

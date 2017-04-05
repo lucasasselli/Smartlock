@@ -10,8 +10,7 @@ namespace SmartLock
 {
     public partial class Program
     {
-        private Window window = new Window();
-        private TextBlock tb1;
+        private Window PinWindow = new Window();
         private PasswordBox pb1;
         private Image imm1;
         private Button bt0;
@@ -29,23 +28,22 @@ namespace SmartLock
 
         private void Display_Initialize()
         {
-            window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.window));
+            PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
             GlideTouch.Initialize();
-            bt0 = (Button)window.GetChildByName("b0");
-            bt1 = (Button)window.GetChildByName("b1");
-            bt2 = (Button)window.GetChildByName("b2");
-            bt3 = (Button)window.GetChildByName("b3");
-            bt4 = (Button)window.GetChildByName("b4");
-            bt5 = (Button)window.GetChildByName("b5");
-            bt6 = (Button)window.GetChildByName("b6");
-            bt7 = (Button)window.GetChildByName("b7");
-            bt8 = (Button)window.GetChildByName("b8");
-            bt9 = (Button)window.GetChildByName("b9");
-            btdel = (Button)window.GetChildByName("bdel");
-            btac = (Button)window.GetChildByName("bac");
-            tb1 = (TextBlock)window.GetChildByName("t1");
-            imm1 = (Image)window.GetChildByName("imm1");
-            pb1 = (PasswordBox)window.GetChildByName("p1");
+            bt0 = (Button)PinWindow.GetChildByName("b0");
+            bt1 = (Button)PinWindow.GetChildByName("b1");
+            bt2 = (Button)PinWindow.GetChildByName("b2");
+            bt3 = (Button)PinWindow.GetChildByName("b3");
+            bt4 = (Button)PinWindow.GetChildByName("b4");
+            bt5 = (Button)PinWindow.GetChildByName("b5");
+            bt6 = (Button)PinWindow.GetChildByName("b6");
+            bt7 = (Button)PinWindow.GetChildByName("b7");
+            bt8 = (Button)PinWindow.GetChildByName("b8");
+            bt9 = (Button)PinWindow.GetChildByName("b9");
+            btdel = (Button)PinWindow.GetChildByName("bdel");
+            btac = (Button)PinWindow.GetChildByName("bac");
+            imm1 = (Image)PinWindow.GetChildByName("imm1");
+            pb1 = (PasswordBox)PinWindow.GetChildByName("p1");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -60,7 +58,7 @@ namespace SmartLock
             btdel.TapEvent += btdel_TapEvent;
             btac.TapEvent += btac_TapEvent;
 
-            Glide.MainWindow = window;
+            Glide.MainWindow = PinWindow;
         }
 
         private void bt0_TapEvent(object sender)
@@ -167,8 +165,6 @@ namespace SmartLock
             numDigits++;
             if (numDigits == pswLength)
             {
-                tb1.Text = "Checking...";
-                tb1.Invalidate();
                 if (!flagEmptyUserList)
                 {
                     foreach (UserForLock user in UserList)
@@ -196,15 +192,14 @@ namespace SmartLock
                 Logs.Add(accessLog); //add log to log list
                 if (flagConnectionOn)
                     ServerPOST(); //send log
+                else
+                    flagPendingLog = true; //pending logs
                 flagAuthorizedAccess = false; //reset flag
-                Glide.MainWindow = window; //back to main window
+                Glide.MainWindow = PinWindow; //back to main window
                 numDigits = 0;
                 password = String.Empty; //clear password
                 pb1.Text = password;
                 pb1.Invalidate();
-                window.FillRect(tb1.Rect); //clear textbox
-                tb1.Text = ""; //clear textbox
-                tb1.Invalidate();
             }
         }
 

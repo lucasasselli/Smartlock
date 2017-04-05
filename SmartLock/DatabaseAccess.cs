@@ -64,6 +64,7 @@ namespace SmartLock
             request_stream.Close();
             request_writer.Close();
             Logs.Clear(); //clear log list
+            flagPendingLog = false; //all logs sent
         }
 
         private void parseJsonResponse(string response_string)
@@ -185,6 +186,8 @@ namespace SmartLock
                 flagFirstConnection = false;
                 timerServerReq.Start();
             }
+            if (flagPendingLog)
+                ServerPOST(); //send accumulated logs
             Debug.Print("Network is up!"); //debug
             Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress); //debug
         }
