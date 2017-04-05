@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using Microsoft.SPOT;
 
 using GHI.Glide;
 using GHI.Glide.Display;
@@ -12,7 +13,6 @@ namespace SmartLock
     {
         private Window PinWindow = new Window();
         private PasswordBox pb1;
-        private Image imm1;
         private Button bt0;
         private Button bt1;
         private Button bt2;
@@ -25,10 +25,29 @@ namespace SmartLock
         private Button bt9;
         private Button btac;
         private Button btdel;
+        private Window AccessAllowedWindow = new Window();
+        private Bitmap immAccessAllowed;
+        private Image immOK;
+        private TextBlock tbOK;
+        private Window AccessDeniedWindow = new Window();
+        private Bitmap immAccessDenied;
+        private Image immAlt;
+        private TextBlock tbAlt;
 
         private void Display_Initialize()
         {
-            PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
+            //load resources:
+            PinWindow = GlideLoader.LoadWindow(Resources.GetString(
+                Resources.StringResources.PinWindow));
+            AccessAllowedWindow = GlideLoader.LoadWindow(Resources.GetString(
+                Resources.StringResources.AccessAllowedWindow));
+            AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(
+                Resources.StringResources.AccessDeniedWindow));
+            immAccessAllowed = new Bitmap(Resources.GetBytes(
+                Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
+            immAccessDenied = new Bitmap(Resources.GetBytes(
+                Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);
+            //initialization:
             GlideTouch.Initialize();
             bt0 = (Button)PinWindow.GetChildByName("b0");
             bt1 = (Button)PinWindow.GetChildByName("b1");
@@ -42,8 +61,11 @@ namespace SmartLock
             bt9 = (Button)PinWindow.GetChildByName("b9");
             btdel = (Button)PinWindow.GetChildByName("bdel");
             btac = (Button)PinWindow.GetChildByName("bac");
-            imm1 = (Image)PinWindow.GetChildByName("imm1");
             pb1 = (PasswordBox)PinWindow.GetChildByName("p1");
+            immOK = (Image)AccessAllowedWindow.GetChildByName("immOK");
+            tbOK = (TextBlock)AccessAllowedWindow.GetChildByName("tbOK");
+            immAlt = (Image)AccessDeniedWindow.GetChildByName("immAlt");
+            tbAlt = (TextBlock)AccessDeniedWindow.GetChildByName("tbAlt");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -154,7 +176,7 @@ namespace SmartLock
 
         private void btac_TapEvent(object sender)
         {
-            password = String.Empty;
+            password = String.Empty; //clear password
             pb1.Text = password;
             pb1.Invalidate();
             numDigits = 0;
@@ -163,9 +185,9 @@ namespace SmartLock
         private void checkPsw()
         {
             numDigits++;
-            if (numDigits == pswLength)
+            if (numDigits == pswLength) //reached password length
             {
-                if (!flagEmptyUserList)
+                if (!flagEmptyUserList) //if there are users
                 {
                     foreach (UserForLock user in UserList)
                     {
@@ -189,13 +211,12 @@ namespace SmartLock
                     accessLog = new Log(2, "Pin " + password + " inserted. Access denied.",
                         DateTime.Now.ToString());
                 }
+                flagAuthorizedAccess = false; //reset flag
                 Logs.Add(accessLog); //add log to log list
                 if (flagConnectionOn)
                     ServerPOST(); //send log
                 else
                     flagPendingLog = true; //pending logs
-                flagAuthorizedAccess = false; //reset flag
-                Glide.MainWindow = PinWindow; //back to main window
                 numDigits = 0;
                 password = String.Empty; //clear password
                 pb1.Text = password;
@@ -205,7 +226,25 @@ namespace SmartLock
 
         private void printAccessWindow(bool flagAuthorizedAccess)
         {
-            //TODO
+            if (flagAuthorizedAccess)
+            {
+                Glide.MainWindow = AccessAllowedWindow;
+                immOK.Bitmap = immAccessAllowed;
+                immOK.Render(); //adapt to imagebox
+                tbOK.Text = "Access Allowed!";
+                immOK.Invalidate(); //send image to display
+                tbOK.Invalidate(); //send text to display
+            }
+            else
+            {
+                Glide.MainWindow = AccessDeniedWindow;
+                immAlt.Bitmap = immAccessDenied;
+                immAlt.Render();
+                tbAlt.Text = "Access Denied!";
+                immAlt.Invalidate();
+                tbAlt.Invalidate();
+            }
+            timerSecondWindow.Start(); //set second window for a time interval
         }
     }
 }

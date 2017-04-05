@@ -113,4 +113,16 @@
     <None Include="Resources\NinaB.tinyfnt" />
     <None Include="Resources\small.tinyfnt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ImmAccessAllowed.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\OK.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ImmAccessDenied.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Alt.bmp" />
+  </ItemGroup>
 </Project>

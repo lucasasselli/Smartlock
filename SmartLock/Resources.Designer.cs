@@ -33,16 +33,28 @@ namespace SmartLock
         {
             return ((string)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
+        internal static byte[] GetBytes(Resources.BinaryResources id)
+        {
+            return ((byte[])(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
+        }
+        [System.SerializableAttribute()]
+        internal enum BinaryResources : short
+        {
+            ImmAccessAllowed = 4166,
+            ImmAccessDenied = 31422,
+        }
+        [System.SerializableAttribute()]
+        internal enum StringResources : short
+        {
+            AccessAllowedWindow = 11781,
+            AccessDeniedWindow = 25188,
+            PinWindow = 29358,
+        }
         [System.SerializableAttribute()]
         internal enum FontResources : short
         {
             small = 13070,
             NinaB = 18060,
-        }
-        [System.SerializableAttribute()]
-        internal enum StringResources : short
-        {
-            PinWindow = 29358,
         }
     }
 }
