@@ -39,8 +39,9 @@
   <!-- Everything below here is custom to .NET MF / Gadgeteer template-->
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
-    <Compile Include="DatabaseAccess.cs" />
+    <Compile Include="DataHelper.cs" />
     <Compile Include="Display.cs" />
+    <Compile Include="DatabaseAccess.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -54,7 +55,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="CacheAccess.cs" />
-    <Compile Include="Classes.cs" />
+    <Compile Include="DataStructures.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Gadgeteer" />

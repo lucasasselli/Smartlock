@@ -14,47 +14,58 @@ using Gadgeteer.Modules.GHIElectronics;
 
 namespace SmartLock
 {
-    public partial class Program
+    // This will most likely substitute ServerAccess
+    public class DatabaseAccess
     {
+        // Request + JSON stuff
+        private const string ServerIP = "192.168.1.101";
+        private const string ServerPort = "8000";
         private const string GadgeteerID = "1";
-        private const string URL = "http://localhost:8000/SmartLockRESTService/data/?id=" + GadgeteerID;
+        private const string URL = "http://" + ServerIP + ":" + ServerPort + "/SmartLockRESTService/data/?id=" + GadgeteerID; 
         private const string UserHeader = "AllowedUsers";
         private static string[] fields_user_name = { "CardID", "Expire", "Pin" };
         private const string LogHeader = "Log";
         private static string[] fields_log_name = { "Type", "Pin", "CardID", "Text", "DateTime" };
-        private static ArrayList ReceivedUserList = new ArrayList();
 
-        private void ServerRequest()
+        // Loads userlist from db
+        public bool RequestUsers(ArrayList userList)
         {
+            bool isOk = false; 
+
+            Debug.Print("Sending request to Server...");
+
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
-            using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+            try
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
                 {
-                    Stream response_stream = response.GetResponseStream();
-                    StreamReader response_reader = new StreamReader(response_stream);
-                    string response_string = response_reader.ReadToEnd();
-                    response_stream.Close();
-                    response_reader.Close();
-                    parseJsonResponse(response_string);
-                    if (ReceivedUserList.Count != 0) //if received user list != 0
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        int num_users = UserList.Count;
-                        foreach (UserForLock user in ReceivedUserList)
-                            UserList.Add(user); //update user list
-                        for (int i = 0; i < num_users; i++)
-                            UserList.RemoveAt(i); //in this way, userlist is never empty
-                        ReceivedUserList.Clear(); //clear received list
+                        Stream response_stream = response.GetResponseStream();
+                        StreamReader response_reader = new StreamReader(response_stream);
+                        string response_string = response_reader.ReadToEnd();
+                        response_stream.Close();
+                        response_reader.Close();
+                        parseJsonResponse(response_string, userList);
+
+                        isOk = true;
                     }
-                    if (UserList.Count != 0)
-                        flagEmptyUserList = false;
+
+                    Debug.Print("Response is: " + response.StatusCode.ToString());
                 }
             }
+            catch (Exception e)
+            {
+                Debug.Print("Exception! " + e.ToString());
+            }
+
+            return isOk;
         }
 
-        private void ServerPOST()
+        // Sends log to db
+        public void SendLogs(ArrayList logList)
         {
-            string json_string = builtJsonLogs(Logs);
+            string json_string = builtJsonLogs(logList);
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
             request.ContentType = "application/json; charset=utf-8";
             request.Method = "POST";
@@ -63,24 +74,23 @@ namespace SmartLock
             request_writer.Write(json_string);
             request_stream.Close();
             request_writer.Close();
-            Logs.Clear(); //clear log list
-            flagPendingLog = false; //all logs sent
         }
 
-        private void parseJsonResponse(string response_string)
+        // Json parser (Userlist)
+        private void parseJsonResponse(string response_string, ArrayList destList)
         {
             int start_header = response_string.IndexOf('\"');
             int end_header = response_string.IndexOf('\"', start_header + 1);
             string header = response_string.Substring(start_header + 1, end_header - 2);
-            if(UserHeader.Equals(header))
+            if (UserHeader.Equals(header))
             {
-                string json = response_string.Substring(end_header + 3, 
+                string json = response_string.Substring(end_header + 3,
                     response_string.Length - end_header - 5);
                 //here I have: {"CardID":"ABCDE","Expire":"31\/03\/2017 12:46:59","Pin":"12345"},{"CardID":null,"Expire":"01\/04\/2017 12:46:59","Pin":"67891"}
                 Debug.Print(json);
                 string[] AllowedUsers_string = json.Split('}'); //divide users
                 int UsersNumbers = AllowedUsers_string.Length - 1; //number of users
-                for(int i = 0; i < UsersNumbers; i++) //for every user
+                for (int i = 0; i < UsersNumbers; i++) //for every user
                 {
                     UserForLock User = new UserForLock();
                     AllowedUsers_string[i] = AllowedUsers_string[i] + '}'; //correct the string
@@ -121,7 +131,7 @@ namespace SmartLock
                     Debug.Print("User CardID: " + User.CardID);
                     Debug.Print("USer Expire: " + User.Expire);
                     Debug.Print("USer Pin: " + User.Pin);
-                    ReceivedUserList.Add(User);
+                    destList.Add(User);
                 }
             }
             else
@@ -131,29 +141,30 @@ namespace SmartLock
             }
         }
 
+        // Json builder (Log)
         private static string builtJsonLogs(ArrayList Logs) //can send multiple logs at a time
         {
-            string json_string = "{\""+ LogHeader +"\":[";
-            foreach(Log log in Logs)
+            string json_string = "{\"" + LogHeader + "\":[";
+            foreach (Log log in Logs)
             {
-                json_string = json_string + "{\""+ fields_log_name[0] +"\":";
+                json_string = json_string + "{\"" + fields_log_name[0] + "\":";
                 switch (log.Type)
                 {
                     case 1:
-                        json_string = json_string + log.Type.ToString() + ",\"" + 
-                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" + 
-                            fields_log_name[2] + "\":\"" + log.CardID + "\",\"" + 
-                            fields_log_name[3] + "\":\""  + log.Text + "\",\"" +
+                        json_string = json_string + log.Type.ToString() + ",\"" +
+                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" +
+                            fields_log_name[2] + "\":\"" + log.CardID + "\",\"" +
+                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
                             fields_log_name[4] + "\":\"" + log.DateTime;
                         break;
                     case 2:
-                        json_string = json_string + log.Type.ToString() + ",\"" + 
+                        json_string = json_string + log.Type.ToString() + ",\"" +
                             fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
                             fields_log_name[4] + "\":\"" + log.DateTime;
                         break;
                     case 4:
-                        json_string = json_string + log.Type.ToString() + ",\"" + 
-                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" + 
+                        json_string = json_string + log.Type.ToString() + ",\"" +
+                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" +
                             fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
                             fields_log_name[4] + "\":\"" + log.DateTime;
                         break;
@@ -165,6 +176,7 @@ namespace SmartLock
             return json_string;
         }
 
+        // Updates single use json
         private void writeList(int i, string field, string field_value, UserForLock User)
         {
             if (field_value.Equals("null"))
@@ -176,26 +188,5 @@ namespace SmartLock
             else if (field.Equals(fields_user_name[2]))
                 User.Pin = field_value;
         }
-
-        private void ethernetJ11D_NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
-            flagConnectionOn = true;
-            if (flagFirstConnection)
-            {
-                ServerRequest();
-                flagFirstConnection = false;
-                timerServerReq.Start();
-            }
-            if (flagPendingLog)
-                ServerPOST(); //send accumulated logs
-            Debug.Print("Network is up!"); //debug
-            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress); //debug
-        }
-
-        private void ethernetJ11D_NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
-        {
-            flagConnectionOn = false;
-            Debug.Print("Network is down!"); //debug
-        }
-    } //end class
-} //end namespace
+    }
+} 

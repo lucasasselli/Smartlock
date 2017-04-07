@@ -3,6 +3,7 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
+    [Serializable]
     public class UserForLock
     {
         public string Pin { get; set; }

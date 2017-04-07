@@ -43,10 +43,10 @@ namespace SmartLock
                 Resources.StringResources.AccessAllowedWindow));
             AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(
                 Resources.StringResources.AccessDeniedWindow));
-            immAccessAllowed = new Bitmap(Resources.GetBytes(
+            /*immAccessAllowed = new Bitmap(Resources.GetBytes(
                 Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
             immAccessDenied = new Bitmap(Resources.GetBytes(
-                Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);
+                Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);*/
             //initialization:
             GlideTouch.Initialize();
             bt0 = (Button)PinWindow.GetChildByName("b0");
@@ -187,36 +187,23 @@ namespace SmartLock
             numDigits++;
             if (numDigits == pswLength) //reached password length
             {
-                if (!flagEmptyUserList) //if there are users
-                {
-                    foreach (UserForLock user in UserList)
-                    {
-                        if (password.Equals(user.Pin))
-                        {
-                            flagAuthorizedAccess = true;
-                            break;
-                        }
-                    }
-                }
-                printAccessWindow(flagAuthorizedAccess);
+                bool authorized = dataHelper.CheckPin(password);
+
+                printAccessWindow(authorized);
                 Log accessLog; //create a new log
-                if (flagAuthorizedAccess)
+                if (authorized)
                 {
+                    // Access granted
                     unlockDoor();
-                    accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.",
-                        DateTime.Now.ToString());
+                    accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.", DateTime.Now.ToString());
+                } else {
+                    // Access denied
+                    accessLog = new Log(2, "Pin " + password + " inserted. Access denied.", DateTime.Now.ToString());
                 }
-                else
-                {
-                    accessLog = new Log(2, "Pin " + password + " inserted. Access denied.",
-                        DateTime.Now.ToString());
-                }
-                flagAuthorizedAccess = false; //reset flag
-                Logs.Add(accessLog); //add log to log list
-                if (flagConnectionOn)
-                    ServerPOST(); //send log
-                else
-                    flagPendingLog = true; //pending logs
+
+                dataHelper.AddLog(accessLog); //add log to log list
+
+                // Reset interface
                 numDigits = 0;
                 password = String.Empty; //clear password
                 pb1.Text = password;
@@ -230,18 +217,18 @@ namespace SmartLock
             {
                 Glide.MainWindow = AccessAllowedWindow;
                 immOK.Bitmap = immAccessAllowed;
-                immOK.Render(); //adapt to imagebox
+                //immOK.Render(); //adapt to imagebox
                 tbOK.Text = "Access Allowed!";
-                immOK.Invalidate(); //send image to display
+                //immOK.Invalidate(); //send image to display
                 tbOK.Invalidate(); //send text to display
             }
             else
             {
                 Glide.MainWindow = AccessDeniedWindow;
                 immAlt.Bitmap = immAccessDenied;
-                immAlt.Render();
+                //immAlt.Render();
                 tbAlt.Text = "Access Denied!";
-                immAlt.Invalidate();
+                //immAlt.Invalidate();
                 tbAlt.Invalidate();
             }
             timerSecondWindow.Start(); //set second window for a time interval
