@@ -43,10 +43,10 @@ namespace SmartLock
                 Resources.StringResources.AccessAllowedWindow));
             AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(
                 Resources.StringResources.AccessDeniedWindow));
-            immAccessAllowed = new Bitmap(Resources.GetBytes(
-                Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
-            immAccessDenied = new Bitmap(Resources.GetBytes(
-                Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);
+            //immAccessAllowed = new Bitmap(Resources.GetBytes(
+                //Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Jpeg);
+            //immAccessDenied = new Bitmap(Resources.GetBytes(
+                //Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Jpeg);
             //initialization:
             GlideTouch.Initialize();
             bt0 = (Button)PinWindow.GetChildByName("b0");
@@ -229,19 +229,19 @@ namespace SmartLock
             if (flagAuthorizedAccess)
             {
                 Glide.MainWindow = AccessAllowedWindow;
-                immOK.Bitmap = immAccessAllowed;
-                immOK.Render(); //adapt to imagebox
+                //immOK.Bitmap = immAccessAllowed;
+                //immOK.Render(); //adapt to imagebox
                 tbOK.Text = "Access Allowed!";
-                immOK.Invalidate(); //send image to display
+                //immOK.Invalidate(); //send image to display
                 tbOK.Invalidate(); //send text to display
             }
             else
             {
                 Glide.MainWindow = AccessDeniedWindow;
-                immAlt.Bitmap = immAccessDenied;
-                immAlt.Render();
+                //immAlt.Bitmap = immAccessDenied;
+                //immAlt.Render();
                 tbAlt.Text = "Access Denied!";
-                immAlt.Invalidate();
+                //immAlt.Invalidate();
                 tbAlt.Invalidate();
             }
             timerSecondWindow.Start(); //set second window for a time interval

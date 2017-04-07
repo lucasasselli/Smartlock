@@ -51,7 +51,7 @@ namespace SmartLock
             ethernetJ11D.NetworkUp += ethernetJ11D_NetworkUp;
             ethernetJ11D.NetworkDown += ethernetJ11D_NetworkDown;
 
-            Thread.Sleep(Timeout.Infinite); //sleep forever
+            //Thread.Sleep(Timeout.Infinite); //sleep forever
         }
 
         private void timerServerReq_Tick(GT.Timer timerServerReq)
