@@ -117,19 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccessAllowedWindow" xml:space="preserve">
+  <data name="AccessWindow" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;Image Name="immOK" X="80" Y="20" Width="160" Height="160" Alpha="255"/&gt;
-    &lt;TextBlock Name="tbOK" X="60" Y="190" Width="200" Height="32" Alpha="255" Text="TextBlock" TextAlign="Center" TextVerticalAlign="Center" Font="6" FontColor="FF3333" BackColor="000000" ShowBackColor="False"/&gt;
-  &lt;/Window&gt;
-&lt;/Glide&gt;</value>
-  </data>
-  <data name="AccessDeniedWindow" xml:space="preserve">
-    <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;Image Name="immAlt" X="80" Y="20" Width="160" Height="160" Alpha="255"/&gt;
-    &lt;TextBlock Name="tbAlt" X="60" Y="190" Width="200" Height="32" Alpha="255" Text="TextBlock" TextAlign="Center" TextVerticalAlign="Center" Font="6" FontColor="00CC00" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Image Name="access_imm" X="80" Y="20" Width="160" Height="160" Alpha="255"/&gt;
+    &lt;TextBlock Name="access_tb" X="60" Y="190" Width="200" Height="32" Alpha="255" Text="TextBlock" TextAlign="Center" TextVerticalAlign="Center" Font="6" FontColor="FF3333" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>

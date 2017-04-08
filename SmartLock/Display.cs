@@ -10,9 +10,27 @@ using GT = Gadgeteer;
 
 namespace SmartLock
 {
-    public partial class Program
+    public class Display
     {
+        // Constants
+        private const int pinLength = 5; // pin max length
+        private const int timerSecondWindowCount = 1500; // 1.5 sec
+
+        // Event handling
+        public event PinEventHandler PinFound;
+        public delegate void PinEventHandler(string pin);
+
+        // Timers        
+        private GT.Timer timerSecondWindow; // Timer for access or denied window
+
+        // Global variables
+        private int numDigits; // Current number of digits inside the pin
+        private string pin; // String of the pin
+
         private Window PinWindow = new Window();
+        private Window AccessWindow = new Window();
+
+        // Pin Window element
         private PasswordBox pb1;
         private Button bt0;
         private Button bt1;
@@ -26,27 +44,31 @@ namespace SmartLock
         private Button bt9;
         private Button btac;
         private Button btdel;
-        private Window AccessAllowedWindow = new Window();
-        private Bitmap immAccessAllowed;
-        private Image immOK;
-        private TextBlock tbOK;
-        private Window AccessDeniedWindow = new Window();
-        private Bitmap immAccessDenied;
-        private Image immAlt;
-        private TextBlock tbAlt;
 
-        private void Display_Initialize()
+        // Access window elements
+        private Bitmap immAccessAllowed;
+        private Bitmap immAccessDenied;
+        private Image accessImm;
+        private TextBlock accessTb;
+
+        public Display()
         {
-            //load resources:
+            // Data Setup
+            numDigits = 0;
+
+            timerSecondWindow = new GT.Timer(timerSecondWindowCount); // 1.5 sec
+            timerSecondWindow.Tick += timerAccessWindow_Tick;
+            
+            // Load graphical resources
             PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
-            AccessAllowedWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessAllowedWindow));
-            AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessDeniedWindow));
-            /*immAccessAllowed = new Bitmap(Resources.GetBytes(
-                Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
-            immAccessDenied = new Bitmap(Resources.GetBytes(
-                Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);*/
-            //initialization:
+            AccessWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
+            immAccessAllowed = new Bitmap(Resources.GetBytes(Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
+            immAccessDenied = new Bitmap(Resources.GetBytes(Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);
+
+            // Initialization
             GlideTouch.Initialize();
+
+            // Load pin window elements
             bt0 = (Button) PinWindow.GetChildByName("b0");
             bt1 = (Button) PinWindow.GetChildByName("b1");
             bt2 = (Button) PinWindow.GetChildByName("b2");
@@ -60,10 +82,6 @@ namespace SmartLock
             btdel = (Button) PinWindow.GetChildByName("bdel");
             btac = (Button) PinWindow.GetChildByName("bac");
             pb1 = (PasswordBox) PinWindow.GetChildByName("p1");
-            immOK = (Image) AccessAllowedWindow.GetChildByName("immOK");
-            tbOK = (TextBlock) AccessAllowedWindow.GetChildByName("tbOK");
-            immAlt = (Image) AccessDeniedWindow.GetChildByName("immAlt");
-            tbAlt = (TextBlock) AccessDeniedWindow.GetChildByName("tbAlt");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -78,95 +96,99 @@ namespace SmartLock
             btdel.TapEvent += btdel_TapEvent;
             btac.TapEvent += btac_TapEvent;
 
+            // Load access window elements
+            accessImm = (Image) AccessWindow.GetChildByName("access_imm");
+            accessTb = (TextBlock) AccessWindow.GetChildByName("access_tb");
+
             Glide.MainWindow = PinWindow;
         }
 
         private void bt0_TapEvent(object sender)
         {
-            password = password + '0';
-            pb1.Text = password;
-            pb1.Invalidate(); //update passwordbox
-            checkPsw();
+            pin = pin + '0';
+            pb1.Text = pin;
+            pb1.Invalidate(); //update pinbox
+            CheckPin();
         }
 
         private void bt1_TapEvent(object sender)
         {
-            password = password + '1';
-            pb1.Text = password;
+            pin = pin + '1';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt2_TapEvent(object sender)
         {
-            password = password + '2';
-            pb1.Text = password;
+            pin = pin + '2';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt3_TapEvent(object sender)
         {
-            password = password + '3';
-            pb1.Text = password;
+            pin = pin + '3';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt4_TapEvent(object sender)
         {
-            password = password + '4';
-            pb1.Text = password;
+            pin = pin + '4';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt5_TapEvent(object sender)
         {
-            password = password + '5';
-            pb1.Text = password;
+            pin = pin + '5';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt6_TapEvent(object sender)
         {
-            password = password + '6';
-            pb1.Text = password;
+            pin = pin + '6';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt7_TapEvent(object sender)
         {
-            password = password + '7';
-            pb1.Text = password;
+            pin = pin + '7';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt8_TapEvent(object sender)
         {
-            password = password + '8';
-            pb1.Text = password;
+            pin = pin + '8';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void bt9_TapEvent(object sender)
         {
-            password = password + '9';
-            pb1.Text = password;
+            pin = pin + '9';
+            pb1.Text = pin;
             pb1.Invalidate();
-            checkPsw();
+            CheckPin();
         }
 
         private void btdel_TapEvent(object sender)
         {
-            if (password.Length != 0)
+            if (pin.Length != 0)
             {
-                password = password.Substring(0, password.Length - 1);
-                pb1.Text = password;
+                pin = pin.Substring(0, pin.Length - 1);
+                pb1.Text = pin;
                 pb1.Invalidate();
                 numDigits--;
             }
@@ -174,76 +196,57 @@ namespace SmartLock
 
         private void btac_TapEvent(object sender)
         {
-            password = String.Empty; //clear password
-            pb1.Text = password;
+            pin = String.Empty; //clear pin
+            pb1.Text = pin;
             pb1.Invalidate();
             numDigits = 0;
         }
 
-        private void checkPsw()
+        private void CheckPin()
         {
             numDigits++;
-            if (numDigits == pswLength) //reached password length
+            if (numDigits == pinLength) //reached pin length
             {
-                bool authorized = dataHelper.CheckPin(password);
-                ParseAccess(authorized);
+                // Calls the PinFound event
+                PinFound(pin);
+
+                // Reset interface
+                numDigits = 0;
+                pin = String.Empty; //clear pin
+                pb1.Text = pin;
+                pb1.Invalidate();
             }
         }
 
-        // Shows the result of an access on the display and logs the event
-        private void ParseAccess(bool authorized)
-        {
-            printAccessWindow(authorized);
-            Log accessLog; //create a new log
-            if (authorized)
-            {
-                // Access granted
-                UnlockDoor();
-                accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.", DateTime.Now.ToString());
-            }
-            else
-            {
-                // Access denied
-                accessLog = new Log(2, "Pin " + password + " inserted. Access denied.", DateTime.Now.ToString());
-            }
-
-            dataHelper.AddLog(accessLog); //add log to log list
-
-            // Reset interface
-            numDigits = 0;
-            password = String.Empty; //clear password
-            pb1.Text = password;
-            pb1.Invalidate();
-        }
-
-        private void printAccessWindow(bool flagAuthorizedAccess)
+        // Show Access window
+        public void ShowAccessWindow(bool flagAuthorizedAccess)
         {
             if (flagAuthorizedAccess)
             {
-                Glide.MainWindow = AccessAllowedWindow;
-                immOK.Bitmap = immAccessAllowed;
-                //immOK.Render(); //adapt to imagebox
-                tbOK.Text = "Access Allowed!";
-                //immOK.Invalidate(); //send image to display
-                tbOK.Invalidate(); //send text to display
+
+                accessImm.Bitmap = immAccessAllowed;
+                accessTb.Text = "Access Allowed!";
             }
             else
             {
-                Glide.MainWindow = AccessDeniedWindow;
-                immAlt.Bitmap = immAccessDenied;
-                //immAlt.Render();
-                tbAlt.Text = "Access Denied!";
-                //immAlt.Invalidate();
-                tbAlt.Invalidate();
+                accessImm.Bitmap = immAccessDenied;
+                accessTb.Text = "Access Denied!";
             }
-            timerSecondWindow.Start(); //set second window for a time interval
+
+            accessImm.Render(); // Adapt to imagebox
+            accessImm.Invalidate(); // Send image to display
+            accessTb.Invalidate(); // Send text to display
+            Glide.MainWindow = AccessWindow;
+
+            // Set second window for a time interval
+            timerSecondWindow.Start(); 
         }
 
         // Remove second window
-        private void timerSecondWindow_Tick(GT.Timer timerSecondWindow)
+        private void timerAccessWindow_Tick(GT.Timer timerAccessWindow)
         {
             Glide.MainWindow = PinWindow; //back to main window
-            timerSecondWindow.Stop();
+            timerAccessWindow.Stop();
         }
     }
 }

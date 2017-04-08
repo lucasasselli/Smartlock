@@ -42,7 +42,6 @@
     <Compile Include="DataHelper.cs" />
     <Compile Include="Display.cs" />
     <Compile Include="DatabaseAccess.cs" />
-    <Compile Include="NFC.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -120,13 +119,7 @@
     <None Include="Resources\small.tinyfnt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\ImmAccessAllowed.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\OK.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ImmAccessDenied.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Alt.bmp" />

@@ -14,39 +14,93 @@ namespace SmartLock
 {
     public partial class Program
     {
-        // Define
-        private const int pswLength = 5; // Password max length
-        private const int timerSecondWindowCount = 1500; // 1.5 sec
-
-        // Global variables
-        private int numDigits; // Current number of digits inside the password
-        private string password; // String of the password
-        
-        // Timers        
-        private GT.Timer timerSecondWindow; // Timer for access or denied window
-
+        // Main Objects
         private DataHelper dataHelper;
+        private Display display;
 
         public void ProgramStarted()
         {
-            Debug.Print("Program started!");
-            
-            // Display Setup
-            numDigits = 0;
-            Display_Initialize();
+            Debug.Print("Program started!");          
 
-            timerSecondWindow = new GT.Timer(timerSecondWindowCount); // 1.5 sec
-            timerSecondWindow.Tick += timerSecondWindow_Tick;
-
-            // Data Setup
+            // Object init
             dataHelper = new DataHelper(ethernetJ11D, sdCard);
+            display = new Display();
 
             // NFC Setup
             adafruit_PN532.TagFound += TagFound;
-            adafruit_PN532.StartScan(1000, 100);
+            //adafruit_PN532.StartScan(1000, 100);
+
+            // Pin Setup
+            display.PinFound += PinFound;
         }
 
-        // Unlock the Door
+        /*
+         * This event occurs when the user passes a NFC card near the reader.
+         * It checks if the UID is valid and unlock the door if so.
+         */
+        public void TagFound(string uid)
+        {
+            // Check authorization
+            bool authorized = dataHelper.CheckCardID(uid);
+
+            // Show access window
+            display.ShowAccessWindow(authorized);
+
+            // Log the event
+            Log accessLog; //create a new log
+            string logText;
+            if (authorized)
+            {
+                // Access granted
+                UnlockDoor();
+                logText = "Card " + uid + " inserted. Authorized access.";
+            }
+            else
+            {
+                // Access denied
+                logText = "Card " + uid + " inserted. Access denied!";
+            }
+            Debug.Print(logText);
+            accessLog = new Log(2, logText, DateTime.Now.ToString());
+            dataHelper.AddLog(accessLog); //add log to log list
+        }
+
+        /*
+         * This event occurs when the user inserts a pin code.
+         * It checks if the pin is valid and unlock the door if so.
+         */
+        public void PinFound(string pin)
+        {
+            // Check authorization
+            bool authorized = dataHelper.CheckPin(pin);
+
+            // Show access window
+            display.ShowAccessWindow(authorized);
+
+            // Log the event
+            Log accessLog; //create a new log
+            string logText;
+            if (authorized)
+            {
+                // Access granted
+                UnlockDoor();
+                logText = "Pin " + pin + " inserted. Authorized access.";
+            }
+            else
+            {
+                // Access denied
+                logText = "Pin " + pin + " inserted. Access denied!";
+            }
+            Debug.Print(logText);
+            accessLog = new Log(2, logText, DateTime.Now.ToString());
+            dataHelper.AddLog(accessLog); //add log to log list
+
+            // TODO: if UID is null ask to add card
+        }
+
+        /*
+         * Called by either PinFound or TagFound to unlock the door.
+         */
         private void UnlockDoor()
         {
             //TODO
