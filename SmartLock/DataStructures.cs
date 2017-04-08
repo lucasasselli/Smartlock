@@ -3,6 +3,12 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
+    /*
+     * NOTE: Serializizable class attribute allows object serialization!
+     * 
+     * DO NOT REMOVE OR EDIT!
+     */
+
     [Serializable]
     public class UserForLock
     {
@@ -11,6 +17,7 @@ namespace SmartLock
         public string Expire { get; set; }
     }
 
+    [Serializable]
     public class Log
     {
         public Log(int type, string pin, string cardID, string text, string dateTime) //type 1

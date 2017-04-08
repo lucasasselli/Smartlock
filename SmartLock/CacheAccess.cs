@@ -39,7 +39,7 @@ namespace SmartLock
 
         public bool StoreLogs(ArrayList logList)
         {
-            return Store(logList, USER_CACHE_FILE);
+            return Store(logList, LOG_CACHE_FILE);
         }
 
         // Inner methods
@@ -92,6 +92,7 @@ namespace SmartLock
                 return false;
             }
 
+            Debug.Print("File \"" + file + "\" successfully loaded into \"" + list.ToString() + "\" object");
 
             return true;
         }
@@ -103,6 +104,8 @@ namespace SmartLock
             {
                 return false;
             }
+
+            FileExists(file);
 
             byte[] data;
 
@@ -137,6 +140,8 @@ namespace SmartLock
                 return false;
             }
 
+            Debug.Print("Object \"" + list.ToString() + "\" successfully stored into \"" + file + "\" file");
+
             return true;
         }
 
@@ -167,20 +172,19 @@ namespace SmartLock
             string root = sdCard.StorageDevice.RootDirectory;
             string[] foundFiles = sdCard.StorageDevice.ListFiles(root);
 
-            if (foundFiles.Length > 0)
-                Debug.Print("Files in SD root: ");
-            else
-                Debug.Print("Folder is empty!");
-
             bool exist = false;
             foreach (string aFile in foundFiles)
             {
-                Debug.Print(aFile);
                 if (String.Compare(file, aFile) == 0)
                 {
-                    Debug.Print("File " + file + " found!");
                     exist = true;
+                    break;
                 }
+            }
+
+            if (!exist)
+            {
+                Debug.Print("File \"" + file + "\" not found!");
             }
 
             return exist;

@@ -48,12 +48,14 @@ namespace SmartLock
             // Load users from cache
             if(cacheAccess.LoadUsers(tempUserList))
             {
+                Debug.Print(tempUserList.Count + " users loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
             }
 
             // Load logs from cache if any
             if (cacheAccess.LoadLogs(tempLogList))
             {
+                Debug.Print(tempUserList.Count + " logs loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
             }
         }
@@ -113,6 +115,8 @@ namespace SmartLock
         {
             if (ethernetJ11D.IsNetworkUp)
             {
+                Debug.Print("Beginning server polling routine...");
+
                 // Clean temporary list
                 tempUserList.Clear();
 
@@ -128,6 +132,7 @@ namespace SmartLock
 
                 if (logList.Count > 0)
                 {
+                    Debug.Print(logList.Count + " stored logs must be sent to server!");
                     // Send accumulated logs
                     if (databaseAccess.SendLogs(logList))
                     {
@@ -136,6 +141,10 @@ namespace SmartLock
                         cacheAccess.StoreLogs(logList);
                     }
                 }
+            }
+            else
+            {
+                Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
             }
         }
     }
