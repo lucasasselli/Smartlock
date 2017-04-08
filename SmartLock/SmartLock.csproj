@@ -42,6 +42,7 @@
     <Compile Include="DataHelper.cs" />
     <Compile Include="Display.cs" />
     <Compile Include="DatabaseAccess.cs" />
+    <Compile Include="NFC.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -86,6 +87,9 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="GTM.GHIElectronics.USBClientEDP, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="GTM.Luca_Sasselli.Adafruit_PN532, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.SPOT.Graphics" />

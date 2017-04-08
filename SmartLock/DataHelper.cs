@@ -24,22 +24,17 @@ namespace SmartLock
         CacheAccess cacheAccess;
         DatabaseAccess databaseAccess;
 
-        // Flags
-        private static bool flagFirstConnection; // first connection after power up
-
         // Timers
         private GT.Timer timerServerReq; // timer for server request
         private const int timerServerReqCount = 120000; // milliseconds -> 2 min
 
-        // Ethernet instance
         EthernetJ11D ethernetJ11D;
 
         public DataHelper(EthernetJ11D ethernetJ11D, SDCard sdCard)
         {
+            // Create wrapped objects
             cacheAccess = new CacheAccess(sdCard);
             databaseAccess = new DatabaseAccess();
-
-            flagFirstConnection = true;
 
             this.ethernetJ11D = ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
@@ -48,7 +43,7 @@ namespace SmartLock
             ethernetJ11D.NetworkDown += NetworkDown;
 
             timerServerReq = new GT.Timer(timerServerReqCount);
-            timerServerReq.Tick += timerServerReq_Tick;
+            timerServerReq.Tick += ServerRoutine;
 
             // Load users from cache
             if(cacheAccess.LoadUsers(tempUserList))
@@ -68,7 +63,7 @@ namespace SmartLock
         {
             foreach (UserForLock user in userList)
             {
-                if (CardID.Equals(user.CardID))
+                if (String.Compare(CardID, user.CardID) == 0)
                 {
                     return true;
                 }
@@ -81,7 +76,7 @@ namespace SmartLock
         {
             foreach (UserForLock user in userList)
             {
-                if (Pin.Equals(user.Pin))
+                if (String.Compare(Pin, user.Pin) == 0)
                 {
                     return true;
                 }
@@ -94,27 +89,17 @@ namespace SmartLock
         {
             logList.Add(log);
 
+            // Update cache copy
+            cacheAccess.StoreLogs(logList);
         }
 
         // Network is online event
         private void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up!"); // debug
-            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress); // debug
+            Debug.Print("Network is up!"); 
+            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
 
-            if (flagFirstConnection)
-            {
-                GetUsers();
-                flagFirstConnection = false;
-                timerServerReq.Start();
-            }
-            if (logList.Count > 0)
-            {
-                // Send accumulated logs
-                databaseAccess.SendLogs(logList);
-                // If success clear logs
-            }
-                
+           timerServerReq.Start();
 
         }
 
@@ -124,33 +109,34 @@ namespace SmartLock
             Debug.Print("Network is down!"); //debug
         }
 
-        private void timerServerReq_Tick(GT.Timer timerServerReq)
+        private void ServerRoutine(GT.Timer timerServerReq)
         {
             if (ethernetJ11D.IsNetworkUp)
             {
-                GetUsers();
+                // Clean temporary list
+                tempUserList.Clear();
+
+                if (databaseAccess.RequestUsers(tempUserList))
+                {
+                    // Copy content to main list
+                    userList.Clear();
+                    Utils.ArrayListCopy(tempUserList, userList);
+
+                    // Store cache copy
+                    cacheAccess.StoreUsers(userList);
+                }
+
+                if (logList.Count > 0)
+                {
+                    // Send accumulated logs
+                    if (databaseAccess.SendLogs(logList))
+                    {
+                        // Log list sent to server successfully: delete loglist
+                        logList.Clear();
+                        cacheAccess.StoreLogs(logList);
+                    }
+                }
             }
-        }
-
-        // 
-        private void GetUsers()
-        {
-            // Clean temporary list
-            tempUserList.Clear();
-
-            if (databaseAccess.RequestUsers(tempUserList))
-            {
-                // Copy content to main list
-                userList.Clear();
-                Utils.ArrayListCopy(tempUserList, userList);
-                cacheAccess.StoreUsers(userList);
-            }
-        }
-
-        // Info
-        public bool IsOnline()
-        {
-            return ethernetJ11D.IsNetworkUp;
         }
     }
 }

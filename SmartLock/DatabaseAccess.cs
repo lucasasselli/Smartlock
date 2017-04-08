@@ -56,24 +56,33 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("Exception! " + e.ToString());
+                Debug.Print("ERROR: Exception while getting user list: " + e.ToString());
+                return false;
             }
 
             return isOk;
         }
 
         // Sends log to db
-        public void SendLogs(ArrayList logList)
+        public bool SendLogs(ArrayList logList)
         {
             string json_string = builtJsonLogs(logList);
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
             request.ContentType = "application/json; charset=utf-8";
             request.Method = "POST";
-            Stream request_stream = request.GetRequestStream();
-            StreamWriter request_writer = new StreamWriter(request_stream);
-            request_writer.Write(json_string);
-            request_stream.Close();
-            request_writer.Close();
+            try
+            {
+                Stream request_stream = request.GetRequestStream();
+                StreamWriter request_writer = new StreamWriter(request_stream);
+                request_writer.Write(json_string);
+                request_stream.Close();
+                request_writer.Close();
+            }catch (Exception e){
+                Debug.Print("ERROR: Exception while sending logs: " + e.ToString());
+                return false;
+            }
+
+            return true;
         }
 
         // Json parser (Userlist)

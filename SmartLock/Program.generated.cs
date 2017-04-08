@@ -27,6 +27,9 @@ namespace SmartLock {
         /// <summary>The SD Card module using socket 5 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.SDCard sdCard;
         
+        /// <summary>The Adafruit_PN532 module using socket 6 of the mainboard.</summary>
+        private Gadgeteer.Modules.Luca_Sasselli.Adafruit_PN532 adafruit_PN532;
+        
         /// <summary>This property provides access to the Mainboard API. This is normally not necessary for an end user program.</summary>
         protected new static GHIElectronics.Gadgeteer.FEZSpiderII Mainboard {
             get {
@@ -53,6 +56,7 @@ namespace SmartLock {
             this.displayTE35 = new GTM.GHIElectronics.DisplayTE35(14, 13, 12, 10);
             this.ethernetJ11D = new GTM.GHIElectronics.EthernetJ11D(7);
             this.sdCard = new GTM.GHIElectronics.SDCard(5);
+            this.adafruit_PN532 = new GTM.Luca_Sasselli.Adafruit_PN532(6);
         }
     }
 }

@@ -32,14 +32,14 @@ namespace SmartLock
             return Load(destination, LOG_CACHE_FILE);
         }
 
-        public void StoreUsers(ArrayList userList)
+        public bool StoreUsers(ArrayList userList)
         {
-            Store(userList, USER_CACHE_FILE);
+            return Store(userList, USER_CACHE_FILE);
         }
 
-        public void StoreLogs(ArrayList logList)
+        public bool StoreLogs(ArrayList logList)
         {
-            Store(logList, USER_CACHE_FILE);
+            return Store(logList, USER_CACHE_FILE);
         }
 
         // Inner methods
@@ -56,18 +56,30 @@ namespace SmartLock
             {
                 return false;
             }
-           
-            FileStream f = sdCard.StorageDevice.OpenRead(file);
 
-            if (f.Length == 0)
+            byte[] data;
+
+
+            try
             {
-                Debug.Print("ERROR: File \"" + file + "\" is empty!");
+                FileStream f = sdCard.StorageDevice.OpenRead(file);
+
+                // If the file is empty do not parse
+                if (f.Length == 0)
+                {
+                    Debug.Print("ERROR: File \"" + file + "\" is empty!");
+                    return false;
+                }
+
+                data = new byte[f.Length];
+                f.Read(data, 0, data.Length);
+                f.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.Print("ERROR: Exception while reading \"" + file + "\": " + e.ToString());
                 return false;
             }
-
-            byte[] data = new byte[f.Length];
-            f.Read(data, 0, data.Length);
-            f.Close();
 
             try
             {
@@ -76,7 +88,7 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while deserializing \"" + file + "\"");
+                Debug.Print("ERROR: Exception while deserializing \"" + file + "\": " + e.ToString());
                 return false;
             }
 
@@ -92,17 +104,38 @@ namespace SmartLock
                 return false;
             }
 
-            if (!FileExists(file))
+            byte[] data;
+
+            try
             {
-                // Create file
+                // Serialize data
+                data = Reflection.Serialize(list, typeof(ArrayList));
+
+                // This shouldn't happen, just in case...
+                if (data.Length == 0)
+                {
+                    Debug.Print("ERROR: Serialized data \"" + file + "\" is null!");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Print("ERROR: Exception while serializing \"" + file + "\": " + e.ToString());
+                return false;
             }
 
-            FileStream f = sdCard.StorageDevice.OpenWrite(file);
-
-            // Parse Arraylist to Json
-            byte[] data = Reflection.Serialize(list, typeof(ArrayList));
-            f.Write(data, 0, data.Length);
-            f.Close();
+            try
+            {
+                // Write data
+                FileStream f = sdCard.StorageDevice.OpenWrite(file);
+                f.Write(data, 0, data.Length);
+                f.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.Print("ERROR: Exception while writing \"" + file + "\": " + e.ToString());
+                return false;
+            }
 
             return true;
         }

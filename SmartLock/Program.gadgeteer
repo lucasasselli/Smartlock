@@ -136,5 +136,20 @@
         </socketUses>
       </module>
     </gadgeteerModelHasGadgeteerHardware>
+    <gadgeteerModelHasGadgeteerHardware Id="ac834ddc-47d7-4fea-b2c4-a4f15d9ad130">
+      <module Id="de2f8b4e-e72e-4295-83aa-fc8878d06f85" cachedDefinition="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&#xD;&#xA;&lt;ModuleDefinition xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; Name=&quot;Adafruit_PN532&quot; Manufacturer=&quot;Luca Sasselli&quot; Description=&quot;A Adafruit_PN532 module&quot; Type=&quot;Gadgeteer.Modules.Luca_Sasselli.Adafruit_PN532&quot; HardwareVersion=&quot;1.0&quot; Image=&quot;C:\Program Files (x86)\Luca Sasselli\Microsoft .NET Gadgeteer\Modules\Adafruit_PN532\Resources\Image.jpg&quot; BoardWidth=&quot;51.6&quot; BoardHeight=&quot;42.7&quot; MinimumGadgeteerCoreVersion=&quot;2.42.500&quot; HelpUrl=&quot;&quot; UniqueId=&quot;11ae98dd-e4d9-4744-b917-b1f6470f52ec&quot; InstanceName=&quot;adafruit_PN532&quot; ModuleSuppliesPower=&quot;false&quot;&gt;&#xD;&#xA;  &lt;Power /&gt;&#xD;&#xA;  &lt;ProvidedSockets /&gt;&#xD;&#xA;  &lt;Assemblies&gt;&#xD;&#xA;    &lt;Assembly MFVersion=&quot;4.3&quot; Name=&quot;GTM.Luca_Sasselli.Adafruit_PN532&quot; /&gt;&#xD;&#xA;  &lt;/Assemblies&gt;&#xD;&#xA;  &lt;LibrariesProvided /&gt;&#xD;&#xA;  &lt;Sockets&gt;&#xD;&#xA;    &lt;Socket Orientation=&quot;0&quot; Left=&quot;48&quot; Top=&quot;24&quot; TypesLabel=&quot;S&quot; ConstructorOrder=&quot;1&quot; Optional=&quot;true&quot;&gt;&#xD;&#xA;      &lt;Types&gt;&#xD;&#xA;        &lt;Type&gt;S&lt;/Type&gt;&#xD;&#xA;      &lt;/Types&gt;&#xD;&#xA;      &lt;Pins&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;false&quot;&gt;3&lt;/Pin&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;false&quot;&gt;4&lt;/Pin&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;false&quot;&gt;5&lt;/Pin&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;true&quot;&gt;7&lt;/Pin&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;true&quot;&gt;8&lt;/Pin&gt;&#xD;&#xA;        &lt;Pin Shared=&quot;true&quot;&gt;9&lt;/Pin&gt;&#xD;&#xA;      &lt;/Pins&gt;&#xD;&#xA;    &lt;/Socket&gt;&#xD;&#xA;  &lt;/Sockets&gt;&#xD;&#xA;  &lt;ExtraLibrariesRequired /&gt;&#xD;&#xA;&lt;/ModuleDefinition&gt;" name="adafruit_PN532" moduleType="Gadgeteer.Modules.Luca_Sasselli.Adafruit_PN532" moduleDefinitionId="11ae98dd-e4d9-4744-b917-b1f6470f52ec">
+        <socketUses>
+          <moduleHasSocketUses Id="2f46c4c5-ed60-43f9-9d31-6279189c22f3">
+            <socketUse Id="4e99fed3-5b9e-4228-a101-f78848073912" label="S">
+              <socket>
+                <socketUseReferencesSocket Id="57061aff-34b9-4caa-a4f3-738462644ecf">
+                  <socketMoniker Id="fbbd9869-6e06-4f71-8438-7f0bd9aff11d" />
+                </socketUseReferencesSocket>
+              </socket>
+            </socketUse>
+          </moduleHasSocketUses>
+        </socketUses>
+      </module>
+    </gadgeteerModelHasGadgeteerHardware>
   </gadgeteerHardware>
 </gadgeteerModel>

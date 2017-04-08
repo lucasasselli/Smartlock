@@ -6,6 +6,7 @@ using Microsoft.SPOT;
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;
+using GT = Gadgeteer; 
 
 namespace SmartLock
 {
@@ -37,35 +38,32 @@ namespace SmartLock
         private void Display_Initialize()
         {
             //load resources:
-            PinWindow = GlideLoader.LoadWindow(Resources.GetString(
-                Resources.StringResources.PinWindow));
-            AccessAllowedWindow = GlideLoader.LoadWindow(Resources.GetString(
-                Resources.StringResources.AccessAllowedWindow));
-            AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(
-                Resources.StringResources.AccessDeniedWindow));
+            PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
+            AccessAllowedWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessAllowedWindow));
+            AccessDeniedWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessDeniedWindow));
             /*immAccessAllowed = new Bitmap(Resources.GetBytes(
                 Resources.BinaryResources.ImmAccessAllowed), Bitmap.BitmapImageType.Bmp);
             immAccessDenied = new Bitmap(Resources.GetBytes(
                 Resources.BinaryResources.ImmAccessDenied), Bitmap.BitmapImageType.Bmp);*/
             //initialization:
             GlideTouch.Initialize();
-            bt0 = (Button)PinWindow.GetChildByName("b0");
-            bt1 = (Button)PinWindow.GetChildByName("b1");
-            bt2 = (Button)PinWindow.GetChildByName("b2");
-            bt3 = (Button)PinWindow.GetChildByName("b3");
-            bt4 = (Button)PinWindow.GetChildByName("b4");
-            bt5 = (Button)PinWindow.GetChildByName("b5");
-            bt6 = (Button)PinWindow.GetChildByName("b6");
-            bt7 = (Button)PinWindow.GetChildByName("b7");
-            bt8 = (Button)PinWindow.GetChildByName("b8");
-            bt9 = (Button)PinWindow.GetChildByName("b9");
-            btdel = (Button)PinWindow.GetChildByName("bdel");
-            btac = (Button)PinWindow.GetChildByName("bac");
-            pb1 = (PasswordBox)PinWindow.GetChildByName("p1");
-            immOK = (Image)AccessAllowedWindow.GetChildByName("immOK");
-            tbOK = (TextBlock)AccessAllowedWindow.GetChildByName("tbOK");
-            immAlt = (Image)AccessDeniedWindow.GetChildByName("immAlt");
-            tbAlt = (TextBlock)AccessDeniedWindow.GetChildByName("tbAlt");
+            bt0 = (Button) PinWindow.GetChildByName("b0");
+            bt1 = (Button) PinWindow.GetChildByName("b1");
+            bt2 = (Button) PinWindow.GetChildByName("b2");
+            bt3 = (Button) PinWindow.GetChildByName("b3");
+            bt4 = (Button) PinWindow.GetChildByName("b4");
+            bt5 = (Button) PinWindow.GetChildByName("b5");
+            bt6 = (Button) PinWindow.GetChildByName("b6");
+            bt7 = (Button) PinWindow.GetChildByName("b7");
+            bt8 = (Button) PinWindow.GetChildByName("b8");
+            bt9 = (Button) PinWindow.GetChildByName("b9");
+            btdel = (Button) PinWindow.GetChildByName("bdel");
+            btac = (Button) PinWindow.GetChildByName("bac");
+            pb1 = (PasswordBox) PinWindow.GetChildByName("p1");
+            immOK = (Image) AccessAllowedWindow.GetChildByName("immOK");
+            tbOK = (TextBlock) AccessAllowedWindow.GetChildByName("tbOK");
+            immAlt = (Image) AccessDeniedWindow.GetChildByName("immAlt");
+            tbAlt = (TextBlock) AccessDeniedWindow.GetChildByName("tbAlt");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -188,27 +186,34 @@ namespace SmartLock
             if (numDigits == pswLength) //reached password length
             {
                 bool authorized = dataHelper.CheckPin(password);
-
-                printAccessWindow(authorized);
-                Log accessLog; //create a new log
-                if (authorized)
-                {
-                    // Access granted
-                    unlockDoor();
-                    accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.", DateTime.Now.ToString());
-                } else {
-                    // Access denied
-                    accessLog = new Log(2, "Pin " + password + " inserted. Access denied.", DateTime.Now.ToString());
-                }
-
-                dataHelper.AddLog(accessLog); //add log to log list
-
-                // Reset interface
-                numDigits = 0;
-                password = String.Empty; //clear password
-                pb1.Text = password;
-                pb1.Invalidate();
+                ParseAccess(authorized);
             }
+        }
+
+        // Shows the result of an access on the display and logs the event
+        private void ParseAccess(bool authorized)
+        {
+            printAccessWindow(authorized);
+            Log accessLog; //create a new log
+            if (authorized)
+            {
+                // Access granted
+                UnlockDoor();
+                accessLog = new Log(2, "Pin " + password + " inserted. Authorized access.", DateTime.Now.ToString());
+            }
+            else
+            {
+                // Access denied
+                accessLog = new Log(2, "Pin " + password + " inserted. Access denied.", DateTime.Now.ToString());
+            }
+
+            dataHelper.AddLog(accessLog); //add log to log list
+
+            // Reset interface
+            numDigits = 0;
+            password = String.Empty; //clear password
+            pb1.Text = password;
+            pb1.Invalidate();
         }
 
         private void printAccessWindow(bool flagAuthorizedAccess)
@@ -232,6 +237,13 @@ namespace SmartLock
                 tbAlt.Invalidate();
             }
             timerSecondWindow.Start(); //set second window for a time interval
+        }
+
+        // Remove second window
+        private void timerSecondWindow_Tick(GT.Timer timerSecondWindow)
+        {
+            Glide.MainWindow = PinWindow; //back to main window
+            timerSecondWindow.Stop();
         }
     }
 }

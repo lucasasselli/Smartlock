@@ -42,5 +42,5 @@ namespace SmartLock
         public string CardID { get; set; }
         public string Text { get; set; }
         public string DateTime { get; set; }
-    } //end class
-} //end namespace
+    } 
+}

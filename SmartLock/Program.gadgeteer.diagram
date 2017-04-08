@@ -83,28 +83,28 @@
         </socketUseShape>
       </nestedChildShapes>
     </moduleShape>
-    <socketConnector Id="9e70ced3-09d2-49e5-af62-d19682952670" edgePoints="[(4.33358267849573 : 7.145); (5.665 : 7.145); (5.665 : 6.17358267849573)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <socketConnector Id="9e70ced3-09d2-49e5-af62-d19682952670" edgePoints="[(4.33358267849573 : 7.145); (5.665 : 7.145); (5.665 : 6.17358267849573)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <socketUseReferencesSocketMoniker Id="dde2dbd9-4fc5-4ebb-a18c-4a94d320cf3b" />
       <nodes>
         <socketUseShapeMoniker Id="20caf46a-469c-439c-9446-5a00fd604098" />
         <socketShapeMoniker Id="f512f673-813c-4b2a-9302-1052706e86fd" />
       </nodes>
     </socketConnector>
-    <socketConnector Id="ec7acfe4-0685-4afb-a029-80034a57ff33" edgePoints="[(4.33358267849573 : 7.705); (6.225 : 7.705); (6.225 : 6.17358267849573)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <socketConnector Id="ec7acfe4-0685-4afb-a029-80034a57ff33" edgePoints="[(4.33358267849573 : 7.705); (6.225 : 7.705); (6.225 : 6.17358267849573)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <socketUseReferencesSocketMoniker Id="72dad80f-6cb4-4ac7-b243-aed9e5729314" />
       <nodes>
         <socketUseShapeMoniker Id="26e992dc-cf52-442d-8de8-fe8a79eec793" />
         <socketShapeMoniker Id="15450281-987d-43ec-bc7c-71adb63cad29" />
       </nodes>
     </socketConnector>
-    <socketConnector Id="610ddd25-952a-4a24-8c80-acb731ff570f" edgePoints="[(4.33358267849573 : 8.265); (6.54166666666667 : 8.265 : JumpStart); (6.70833333333333 : 8.265 : JumpEnd); (6.805 : 8.265); (6.805 : 6.17358267849573)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <socketConnector Id="610ddd25-952a-4a24-8c80-acb731ff570f" edgePoints="[(4.33358267849573 : 8.265); (6.54166666666667 : 8.265 : JumpStart); (6.70833333333333 : 8.265 : JumpEnd); (6.805 : 8.265); (6.805 : 6.17358267849573)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <socketUseReferencesSocketMoniker Id="8990b21f-d614-4814-8019-ee8c72e77475" />
       <nodes>
         <socketUseShapeMoniker Id="cacb7eac-ad46-4eca-b5f1-00a8f676a97d" />
         <socketShapeMoniker Id="241f149a-52a6-411e-b90f-597c0f72ea18" />
       </nodes>
     </socketConnector>
-    <socketConnector Id="19e8b961-2867-457b-87e4-b8d66cc01a66" edgePoints="[(4.33358267849573 : 8.845); (6.625 : 8.845); (6.625 : 5.78122047598862)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <socketConnector Id="19e8b961-2867-457b-87e4-b8d66cc01a66" edgePoints="[(4.33358267849573 : 8.845); (6.625 : 8.845); (6.625 : 5.78122047598862)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <socketUseReferencesSocketMoniker Id="cadd3ef3-51c1-46ba-bdb0-0189703e2d61" />
       <nodes>
         <socketUseShapeMoniker Id="c18083b5-874a-4234-b675-3d55521d0b10" />
@@ -141,6 +141,22 @@
       <nodes>
         <socketUseShapeMoniker Id="72e4268e-2d88-48f8-b9f9-fc957ebf7345" />
         <socketShapeMoniker Id="c35abbc8-e2c8-4959-aae7-012b55bcd8a1" />
+      </nodes>
+    </socketConnector>
+    <moduleShape Id="5d74f6cc-a214-4145-9e5a-e5f1d33d5b6c" absoluteBounds="3.8000000000000003, 0.5, 2.0314960629921264, 1.6811023622047245">
+      <moduleMoniker Id="de2f8b4e-e72e-4295-83aa-fc8878d06f85" />
+      <relativeChildShapes />
+      <nestedChildShapes>
+        <socketUseShape Id="69dea2b8-ce42-44fb-8a13-515b201118f2" absoluteBounds="5.5600000000000005, 1.32, 0.25, 0.25">
+          <socketUseMoniker Id="4e99fed3-5b9e-4228-a101-f78848073912" />
+        </socketUseShape>
+      </nestedChildShapes>
+    </moduleShape>
+    <socketConnector Id="1963e1f1-bd49-4a2a-8497-55ca33cb387e" edgePoints="[(5.77358267849573 : 1.445); (6.645 : 1.445); (6.645 : 4.74877952401138)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <socketUseReferencesSocketMoniker Id="57061aff-34b9-4caa-a4f3-738462644ecf" />
+      <nodes>
+        <socketUseShapeMoniker Id="69dea2b8-ce42-44fb-8a13-515b201118f2" />
+        <socketShapeMoniker Id="e05efdb6-b6bf-440d-ba5b-11451df9e6c9" />
       </nodes>
     </socketConnector>
   </nestedChildShapes>
