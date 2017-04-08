@@ -38,16 +38,19 @@ namespace SmartLock
             return ((byte[])(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
         [System.SerializableAttribute()]
+        internal enum BinaryResources : short
+        {
+            data_source_error = -26255,
+            alert_alt = -24827,
+            alert_ok = -10449,
+            data_source_cache = 19598,
+            data_source_remote = 23262,
+        }
+        [System.SerializableAttribute()]
         internal enum StringResources : short
         {
             AccessWindow = -6304,
             PinWindow = 29358,
-        }
-        [System.SerializableAttribute()]
-        internal enum BinaryResources : short
-        {
-            ImmAccessAllowed = 4166,
-            ImmAccessDenied = 31422,
         }
         [System.SerializableAttribute()]
         internal enum FontResources : short

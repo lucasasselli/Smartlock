@@ -126,35 +126,45 @@
 &lt;/Glide&gt;</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ImmAccessAllowed" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\OK.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="alert_alt" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\alert_alt.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="ImmAccessDenied" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Alt.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="alert_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\alert_ok.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="NinaB" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\NinaB.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="PinWindow" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="screen1" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;Button Name="b1" X="112" Y="64" Width="32" Height="32" Alpha="255" Text="1" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b2" X="144" Y="64" Width="32" Height="32" Alpha="255" Text="2" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b3" X="176" Y="64" Width="32" Height="32" Alpha="255" Text="3" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b4" X="112" Y="98" Width="32" Height="32" Alpha="255" Text="4" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b5" X="144" Y="98" Width="32" Height="32" Alpha="255" Text="5" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b6" X="176" Y="98" Width="32" Height="32" Alpha="255" Text="6" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b7" X="112" Y="132" Width="32" Height="32" Alpha="255" Text="7" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b8" X="144" Y="132" Width="32" Height="32" Alpha="255" Text="8" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b9" X="176" Y="132" Width="32" Height="32" Alpha="255" Text="9" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;PasswordBox Name="p1" X="112" Y="16" Width="96" Height="32" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
-    &lt;Button Name="bdel" X="112" Y="166" Width="32" Height="32" Alpha="255" Text="DEL" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="b0" X="144" Y="166" Width="32" Height="32" Alpha="255" Text="0" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="bac" X="176" Y="166" Width="32" Height="32" Alpha="255" Text="AC" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+  &lt;Window Name="screen1" Width="460" Height="240" BackColor="FFFFFF"&gt;
+    &lt;Button Name="b1" X="90" Y="50" Width="46" Height="46" Alpha="255" Text="1" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b2" X="137" Y="50" Width="46" Height="46" Alpha="255" Text="2" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b3" X="184" Y="50" Width="46" Height="46" Alpha="255" Text="3" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b4" X="90" Y="97" Width="46" Height="46" Alpha="255" Text="4" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b5" X="137" Y="97" Width="46" Height="46" Alpha="255" Text="5" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b6" X="184" Y="97" Width="46" Height="46" Alpha="255" Text="6" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b7" X="90" Y="144" Width="46" Height="46" Alpha="255" Text="7" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b8" X="137" Y="144" Width="46" Height="46" Alpha="255" Text="8" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b9" X="184" Y="144" Width="46" Height="46" Alpha="255" Text="9" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;PasswordBox Name="p1" X="90" Y="3" Width="140" Height="46" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
+    &lt;Button Name="bdel" X="90" Y="191" Width="46" Height="46" Alpha="255" Text="DEL" Font="6" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="b0" X="137" Y="191" Width="46" Height="46" Alpha="255" Text="0" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="bac" X="184" Y="191" Width="46" Height="46" Alpha="255" Text="AC" Font="6" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Image Name="data_source" X="29" Y="10" Width="32" Height="32" Alpha="255"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="data_source_cache" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\data_source_cache.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="data_source_error" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\data_source_error.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="data_source_remote" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\data_source_remote.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

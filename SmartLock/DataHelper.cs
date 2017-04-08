@@ -28,7 +28,18 @@ namespace SmartLock
         private GT.Timer timerServerReq; // timer for server request
         private const int timerServerReqCount = 120000; // milliseconds -> 2 min
 
+        // Event handling
+        public event DSChangedEventHandler DataSourceChanged;
+        public delegate void DSChangedEventHandler(int dataSource);
+
+        // Ethernet object
         EthernetJ11D ethernetJ11D;
+
+        // Data source
+        public const int DATA_SOURCE_ERROR = 0;
+        public const int DATA_SOURCE_CACHE = 1;
+        public const int DATA_SOURCE_REMOTE = 2;
+        private int dataSource;
 
         public DataHelper(EthernetJ11D ethernetJ11D, SDCard sdCard)
         {
@@ -45,18 +56,24 @@ namespace SmartLock
             timerServerReq = new GT.Timer(timerServerReqCount);
             timerServerReq.Tick += ServerRoutine;
 
+            // Data source is now error
+            ChangeDataSource(DATA_SOURCE_ERROR);
+
             // Load users from cache
             if(cacheAccess.LoadUsers(tempUserList))
             {
                 Debug.Print(tempUserList.Count + " users loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
+
+                // Data source is now cache
+                ChangeDataSource(DATA_SOURCE_CACHE);
             }
 
             // Load logs from cache if any
             if (cacheAccess.LoadLogs(tempLogList))
             {
-                Debug.Print(tempUserList.Count + " logs loaded from cache!");
-                Utils.ArrayListCopy(tempUserList, userList);
+                Debug.Print(tempLogList.Count + " logs loaded from cache!");
+                Utils.ArrayListCopy(tempLogList, logList);
             }
         }
 
@@ -108,8 +125,17 @@ namespace SmartLock
         // Network is offline event
         private void NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is down!"); //debug
+            Debug.Print("Network is down!");
+
+            // Data source is now cache
+            ChangeDataSource(DATA_SOURCE_CACHE);
         }
+
+        /*
+         * SERVER ROUTINE:
+         * ServerRoutine is the only timed event of this class. It periodically updates the current user data, and
+         * if logs are stored into logList, it sends the logs to the server.
+         */
 
         private void ServerRoutine(GT.Timer timerServerReq)
         {
@@ -128,6 +154,14 @@ namespace SmartLock
 
                     // Store cache copy
                     cacheAccess.StoreUsers(userList);
+
+                    // Data source is now remote
+                    ChangeDataSource(DATA_SOURCE_REMOTE);
+                }
+                else
+                {
+                    // Data source is now cache
+                    ChangeDataSource(DATA_SOURCE_CACHE);
                 }
 
                 if (logList.Count > 0)
@@ -146,6 +180,32 @@ namespace SmartLock
             {
                 Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
             }
+        }
+
+        /*
+         * DATA SOURCE:
+         * The attribute dataSorce stores the source of the user data currently being used.
+         * dataSource is determinred according to the following rules:
+         * - If the data is not being loaded, dataSource is DATA_SOURCE_ERROR
+         * - If the network is down, dataSource is DATA_SOURCE_CACHE
+         * - If the network id up and last ServerRoutine was succesfull, dataSource is DATA_SOURCE_REMOTE
+         * - In any other case, dataSource is DATA_SOURCE_CACHE
+         */
+
+        // Changes the current data source and throws event DataSourceChanged
+        private void ChangeDataSource(int dataSource)
+        {
+            this.dataSource = dataSource;
+            if (DataSourceChanged != null)
+            {
+                DataSourceChanged(dataSource);
+            }
+        }
+
+        // Returns the current data source
+        public int GetDataSource()
+        {
+            return dataSource;
         }
     }
 }

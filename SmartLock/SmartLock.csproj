@@ -49,13 +49,13 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="CacheAccess.cs" />
+    <Compile Include="DataStructures.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="CacheAccess.cs" />
-    <Compile Include="DataStructures.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +119,18 @@
     <None Include="Resources\small.tinyfnt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\OK.bmp" />
+    <None Include="Resources\alert_alt.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Alt.bmp" />
+    <None Include="Resources\alert_ok.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\data_source_cache.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\data_source_error.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\data_source_remote.bmp" />
   </ItemGroup>
 </Project>

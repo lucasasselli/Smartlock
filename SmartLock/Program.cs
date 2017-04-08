@@ -26,19 +26,21 @@ namespace SmartLock
             dataHelper = new DataHelper(ethernetJ11D, sdCard);
             display = new Display();
 
-            // NFC Setup
+            // Event Setup
             adafruit_PN532.TagFound += TagFound;
+            display.PinFound += PinFound;
+            dataHelper.DataSourceChanged += DataSourceChanged;
+
             //adafruit_PN532.StartScan(1000, 100);
 
-            // Pin Setup
-            display.PinFound += PinFound;
         }
 
         /*
+         * TAG FOUND EVENT:
          * This event occurs when the user passes a NFC card near the reader.
          * It checks if the UID is valid and unlock the door if so.
          */
-        public void TagFound(string uid)
+        void TagFound(string uid)
         {
             // Check authorization
             bool authorized = dataHelper.CheckCardID(uid);
@@ -66,10 +68,11 @@ namespace SmartLock
         }
 
         /*
+         * PIN FOUND EVENT:
          * This event occurs when the user inserts a pin code.
          * It checks if the pin is valid and unlock the door if so.
          */
-        public void PinFound(string pin)
+        void PinFound(string pin)
         {
             // Check authorization
             bool authorized = dataHelper.CheckPin(pin);
@@ -99,11 +102,17 @@ namespace SmartLock
         }
 
         /*
+         * UNLOCKDOOR
          * Called by either PinFound or TagFound to unlock the door.
          */
-        private void UnlockDoor()
+        void UnlockDoor()
         {
             //TODO
+        }
+
+        void DataSourceChanged(int dataSource)
+        {
+            display.SetDataSource(dataSource);
         }
     }
 }
