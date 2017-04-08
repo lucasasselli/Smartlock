@@ -122,7 +122,7 @@ namespace SmartLock
             }
             else
             {
-                accessImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_ok), Bitmap.BitmapImageType.Bmp);
+                accessImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_alt), Bitmap.BitmapImageType.Bmp);
                 accessTb.Text = "Access Denied!";
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 
 using Microsoft.SPOT;
 
@@ -24,16 +25,17 @@ namespace SmartLock
         CacheAccess cacheAccess;
         DatabaseAccess databaseAccess;
 
-        // Timers
-        private GT.Timer timerServerReq; // timer for server request
-        private const int timerServerReqCount = 120000; // milliseconds -> 2 min
+        // Thread
+        private bool threadRunning;
+        private Thread threadRoutine;
+        private const int threadPeriod = 120000; // milliseconds -> 2 min
 
         // Event handling
         public event DSChangedEventHandler DataSourceChanged;
         public delegate void DSChangedEventHandler(int dataSource);
 
         // Ethernet object
-        EthernetJ11D ethernetJ11D;
+        private EthernetJ11D ethernetJ11D;
 
         // Data source
         public const int DATA_SOURCE_ERROR = 0;
@@ -47,20 +49,19 @@ namespace SmartLock
             cacheAccess = new CacheAccess(sdCard);
             databaseAccess = new DatabaseAccess();
 
+            threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+
             this.ethernetJ11D = ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
             ethernetJ11D.NetworkSettings.EnableDhcp();
             ethernetJ11D.NetworkUp += NetworkUp;
             ethernetJ11D.NetworkDown += NetworkDown;
 
-            timerServerReq = new GT.Timer(timerServerReqCount);
-            timerServerReq.Tick += ServerRoutine;
-
             // Data source is now error
             ChangeDataSource(DATA_SOURCE_ERROR);
 
             // Load users from cache
-            if(cacheAccess.LoadUsers(tempUserList))
+            if (cacheAccess.LoadUsers(tempUserList))
             {
                 Debug.Print(tempUserList.Count + " users loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
@@ -115,10 +116,11 @@ namespace SmartLock
         // Network is online event
         private void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up!"); 
+            Debug.Print("Network is up!");
             Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
 
-           timerServerReq.Start();
+            // Start ServerRoutine
+            StartRoutine();
 
         }
 
@@ -129,6 +131,9 @@ namespace SmartLock
 
             // Data source is now cache
             ChangeDataSource(DATA_SOURCE_CACHE);
+
+            // Stop ServerRoutine
+            StopRoutine();
         }
 
         /*
@@ -137,49 +142,67 @@ namespace SmartLock
          * if logs are stored into logList, it sends the logs to the server.
          */
 
-        private void ServerRoutine(GT.Timer timerServerReq)
+        private void ServerRoutine()
         {
-            if (ethernetJ11D.IsNetworkUp)
+            while (threadRunning)
             {
-                Debug.Print("Beginning server polling routine...");
-
-                // Clean temporary list
-                tempUserList.Clear();
-
-                if (databaseAccess.RequestUsers(tempUserList))
+                if (ethernetJ11D.IsNetworkUp)
                 {
-                    // Copy content to main list
-                    userList.Clear();
-                    Utils.ArrayListCopy(tempUserList, userList);
+                    Debug.Print("Beginning server polling routine...");
 
-                    // Store cache copy
-                    cacheAccess.StoreUsers(userList);
+                    // Clean temporary list
+                    tempUserList.Clear();
 
-                    // Data source is now remote
-                    ChangeDataSource(DATA_SOURCE_REMOTE);
+                    if (databaseAccess.RequestUsers(tempUserList))
+                    {
+                        // Copy content to main list
+                        userList.Clear();
+                        Utils.ArrayListCopy(tempUserList, userList);
+
+                        // Store cache copy
+                        cacheAccess.StoreUsers(userList);
+
+                        // Data source is now remote
+                        ChangeDataSource(DATA_SOURCE_REMOTE);
+                    }
+                    else
+                    {
+                        // Data source is now cache
+                        ChangeDataSource(DATA_SOURCE_CACHE);
+                    }
+
+                    if (logList.Count > 0)
+                    {
+                        Debug.Print(logList.Count + " stored logs must be sent to server!");
+                        // Send accumulated logs
+                        if (databaseAccess.SendLogs(logList))
+                        {
+                            // Log list sent to server successfully: delete loglist
+                            logList.Clear();
+                            cacheAccess.StoreLogs(logList);
+                        }
+                    }
                 }
                 else
                 {
-                    // Data source is now cache
-                    ChangeDataSource(DATA_SOURCE_CACHE);
+                    Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
                 }
+                Thread.Sleep(threadPeriod);
+            }
+        }
 
-                if (logList.Count > 0)
-                {
-                    Debug.Print(logList.Count + " stored logs must be sent to server!");
-                    // Send accumulated logs
-                    if (databaseAccess.SendLogs(logList))
-                    {
-                        // Log list sent to server successfully: delete loglist
-                        logList.Clear();
-                        cacheAccess.StoreLogs(logList);
-                    }
-                }
-            }
-            else
+        public void StartRoutine()
+        {
+            threadRunning = true;
+            if (!threadRoutine.IsAlive)
             {
-                Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
+                threadRoutine.Start();
             }
+        }
+
+        public void StopRoutine()
+        {
+            threadRunning = false;
         }
 
         /*

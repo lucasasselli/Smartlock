@@ -15,24 +15,24 @@ namespace SmartLock
     public partial class Program
     {
         // Main Objects
-        private DataHelper dataHelper;
         private Display display;
+        private DataHelper dataHelper;
 
         public void ProgramStarted()
         {
             Debug.Print("Program started!");          
 
             // Object init
-            dataHelper = new DataHelper(ethernetJ11D, sdCard);
             display = new Display();
+            dataHelper = new DataHelper(ethernetJ11D, sdCard);
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
             display.PinFound += PinFound;
-            dataHelper.DataSourceChanged += DataSourceChanged;
+            dataHelper.DataSourceChanged += display.SetDataSource;
 
-            //adafruit_PN532.StartScan(1000, 100);
-
+            // Set initial data source
+            display.SetDataSource(dataHelper.GetDataSource());
         }
 
         /*
@@ -108,11 +108,6 @@ namespace SmartLock
         void UnlockDoor()
         {
             //TODO
-        }
-
-        void DataSourceChanged(int dataSource)
-        {
-            display.SetDataSource(dataSource);
         }
     }
 }
