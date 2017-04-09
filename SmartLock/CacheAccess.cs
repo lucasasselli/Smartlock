@@ -83,7 +83,7 @@ namespace SmartLock
 
             try
             {
-                ArrayList temp = (ArrayList)Reflection.Deserialize(data, typeof(ArrayList));
+                ArrayList temp = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
                 Utils.ArrayListCopy(temp, list);
             }
             catch (Exception e)

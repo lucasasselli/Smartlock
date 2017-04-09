@@ -28,7 +28,9 @@ namespace SmartLock
         // Thread
         private bool threadRunning;
         private Thread threadRoutine;
-        private const int threadPeriod = 120000; // milliseconds -> 2 min
+        private ManualResetEvent threadWaitForStop;
+        private const int THREAD_PERIOD_LONG = 120000; // milliseconds -> 2 min
+        private const int THREAD_PERIOD_SHORT = 10000; // milliseconds -> 10 sec
 
         // Event handling
         public event DSChangedEventHandler DataSourceChanged;
@@ -50,6 +52,7 @@ namespace SmartLock
             databaseAccess = new DatabaseAccess();
 
             threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+            threadWaitForStop = new ManualResetEvent(false);
 
             this.ethernetJ11D = ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
@@ -130,7 +133,14 @@ namespace SmartLock
             Debug.Print("Network is down!");
 
             // Data source is now cache
-            ChangeDataSource(DATA_SOURCE_CACHE);
+            if (userList.Count > 0)
+            {
+                ChangeDataSource(DATA_SOURCE_CACHE);
+            }
+            else
+            {
+                ChangeDataSource(DATA_SOURCE_ERROR);
+            }
 
             // Stop ServerRoutine
             StopRoutine();
@@ -138,7 +148,7 @@ namespace SmartLock
 
         /*
          * SERVER ROUTINE:
-         * ServerRoutine is the only timed event of this class. It periodically updates the current user data, and
+         * ServerRoutine is the only thread of this class. It periodically updates the current user data, and
          * if logs are stored into logList, it sends the logs to the server.
          */
 
@@ -153,6 +163,8 @@ namespace SmartLock
                     // Clean temporary list
                     tempUserList.Clear();
 
+                    Debug.Print("Requesting user list to server...");
+
                     if (databaseAccess.RequestUsers(tempUserList))
                     {
                         // Copy content to main list
@@ -164,11 +176,22 @@ namespace SmartLock
 
                         // Data source is now remote
                         ChangeDataSource(DATA_SOURCE_REMOTE);
+
+                        Debug.Print(userList.Count + " users received from server");
                     }
                     else
                     {
+                        Debug.Print("ERROR: User list request failed!");
+
                         // Data source is now cache
-                        ChangeDataSource(DATA_SOURCE_CACHE);
+                        if (userList.Count > 0)
+                        {
+                            ChangeDataSource(DATA_SOURCE_CACHE);
+                        }
+                        else
+                        {
+                            ChangeDataSource(DATA_SOURCE_ERROR);
+                        }
                     }
 
                     if (logList.Count > 0)
@@ -177,9 +200,15 @@ namespace SmartLock
                         // Send accumulated logs
                         if (databaseAccess.SendLogs(logList))
                         {
+                            Debug.Print("Logs sent to server");
+
                             // Log list sent to server successfully: delete loglist
                             logList.Clear();
                             cacheAccess.StoreLogs(logList);
+                        }
+                        else
+                        {
+                            Debug.Print("ERROR: Log sending failed!");
                         }
                     }
                 }
@@ -187,7 +216,12 @@ namespace SmartLock
                 {
                     Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
                 }
-                Thread.Sleep(threadPeriod);
+
+                // Plan next connection
+                if (dataSource != DATA_SOURCE_REMOTE && ethernetJ11D.IsNetworkUp)
+                    threadWaitForStop.WaitOne(THREAD_PERIOD_SHORT, true);
+                else
+                    threadWaitForStop.WaitOne(THREAD_PERIOD_LONG, true);
             }
         }
 
@@ -197,6 +231,10 @@ namespace SmartLock
             if (!threadRoutine.IsAlive)
             {
                 threadRoutine.Start();
+            }
+            else
+            {
+                threadWaitForStop.Set();
             }
         }
 

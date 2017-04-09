@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections;
 using System.Threading;
 using System.Net;
+using System.Text;
 
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
@@ -25,15 +26,10 @@ namespace SmartLock
         private const string UserHeader = "AllowedUsers";
         private static string[] fields_user_name = { "CardID", "Expire", "Pin" };
         private const string LogHeader = "Log";
-        private static string[] fields_log_name = { "Type", "Pin", "CardID", "Text", "DateTime" };
 
         // Loads userlist from db
         public bool RequestUsers(ArrayList userList)
         {
-            bool isOk = false; 
-
-            Debug.Print("Sending request to Server...");
-
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
             try
             {
@@ -46,9 +42,10 @@ namespace SmartLock
                         string response_string = response_reader.ReadToEnd();
                         response_stream.Close();
                         response_reader.Close();
-                        parseJsonResponse(response_string, userList);
-
-                        isOk = true;
+                        if (!Json.ParseNamedArray(UserHeader, response_string, userList, typeof(UserForLock)))
+                        {
+                            return false;
+                        }
                     }
 
                     Debug.Print("Response is: " + response.StatusCode.ToString());
@@ -60,142 +57,64 @@ namespace SmartLock
                 return false;
             }
 
-            return isOk;
+            return true;
         }
 
         // Sends log to db
         public bool SendLogs(ArrayList logList)
         {
-            string json_string = builtJsonLogs(logList);
+            string jsonString = Json.BuildNamedArray(LogHeader, logList);
             HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
-            request.ContentType = "application/json; charset=utf-8";
-            request.Method = "POST";
+            byte[] requestByteArray = Encoding.UTF8.GetBytes(jsonString);
+
             try
             {
-                Stream request_stream = request.GetRequestStream();
-                StreamWriter request_writer = new StreamWriter(request_stream);
-                request_writer.Write(json_string);
-                request_stream.Close();
-                request_writer.Close();
-            }catch (Exception e){
+                // Send the request
+                request.Method = "POST";
+                request.ContentType = "application/json; charset=utf-8";
+                request.ContentLength = requestByteArray.Length;
+
+                Stream postStream = request.GetRequestStream();
+
+                postStream.Write(requestByteArray, 0, requestByteArray.Length);
+                postStream.Close();
+
+                // Grab the response
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    String responseValue = string.Empty;
+
+                    // Error
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
+                        return false;
+                    }
+
+                    // Grab the response
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        if (responseStream != null)
+                        {
+                            using (var reader = new StreamReader(responseStream))
+                            {
+                                responseValue = reader.ReadToEnd();
+                            }
+                        }
+                    }
+
+                    // Print response for debug purposes
+                    Debug.Print("Server response: " + responseValue);
+                }
+
+            }
+            catch (Exception e)
+            {
                 Debug.Print("ERROR: Exception while sending logs: " + e.ToString());
                 return false;
             }
 
             return true;
-        }
-
-        // Json parser (Userlist)
-        private void parseJsonResponse(string response_string, ArrayList destList)
-        {
-            int start_header = response_string.IndexOf('\"');
-            int end_header = response_string.IndexOf('\"', start_header + 1);
-            string header = response_string.Substring(start_header + 1, end_header - 2);
-            if (UserHeader.Equals(header))
-            {
-                string json = response_string.Substring(end_header + 3,
-                    response_string.Length - end_header - 5);
-                //here I have: {"CardID":"ABCDE","Expire":"31\/03\/2017 12:46:59","Pin":"12345"},{"CardID":null,"Expire":"01\/04\/2017 12:46:59","Pin":"67891"}
-                Debug.Print(json);
-                string[] AllowedUsers_string = json.Split('}'); //divide users
-                int UsersNumbers = AllowedUsers_string.Length - 1; //number of users
-                for (int i = 0; i < UsersNumbers; i++) //for every user
-                {
-                    UserForLock User = new UserForLock();
-                    AllowedUsers_string[i] = AllowedUsers_string[i] + '}'; //correct the string
-                    char[] SingleUser = AllowedUsers_string[i].ToCharArray(); //convert to char array
-                    string field;
-                    string field_value;
-                    int j = 0;
-                    while (SingleUser[j] != '}') //till the end of the string
-                    {
-                        field = "";
-                        field_value = "";
-                        while (SingleUser[++j] != '\"') ;
-                        while (SingleUser[++j] != '\"')
-                            field = field + SingleUser[j]; //obtain the field name
-                        Debug.Print(field);
-                        j = j + 2; //skip , and "
-                        if (SingleUser[j] == '\"')
-                        {
-                            while (SingleUser[++j] != '\"')
-                                field_value = field_value + SingleUser[j]; //obtain field value
-                            if (SingleUser[j] == '}') //if string end
-                            {
-                                writeList(i, field, field_value, User);
-                                Debug.Print(field_value);
-                                break; //exit
-                            }
-                            j++; //skip ,
-                        }
-                        else //null field
-                        {
-                            field_value = field_value + SingleUser[j];
-                            while (SingleUser[++j] != ',' && SingleUser[j] != '}')
-                                field_value = field_value + SingleUser[j]; //obtain field value
-                        }
-                        writeList(i, field, field_value, User);
-                        Debug.Print(field_value);
-                    }
-                    Debug.Print("User CardID: " + User.CardID);
-                    Debug.Print("USer Expire: " + User.Expire);
-                    Debug.Print("USer Pin: " + User.Pin);
-                    destList.Add(User);
-                }
-            }
-            else
-            {
-                Debug.Print("Data not recognized");
-                //TODO
-            }
-        }
-
-        // Json builder (Log)
-        private static string builtJsonLogs(ArrayList Logs) //can send multiple logs at a time
-        {
-            string json_string = "{\"" + LogHeader + "\":[";
-            foreach (Log log in Logs)
-            {
-                json_string = json_string + "{\"" + fields_log_name[0] + "\":";
-                switch (log.Type)
-                {
-                    case 1:
-                        json_string = json_string + log.Type.ToString() + ",\"" +
-                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" +
-                            fields_log_name[2] + "\":\"" + log.CardID + "\",\"" +
-                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
-                            fields_log_name[4] + "\":\"" + log.DateTime;
-                        break;
-                    case 2:
-                        json_string = json_string + log.Type.ToString() + ",\"" +
-                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
-                            fields_log_name[4] + "\":\"" + log.DateTime;
-                        break;
-                    case 4:
-                        json_string = json_string + log.Type.ToString() + ",\"" +
-                            fields_log_name[1] + "\":\"" + log.Pin + "\",\"" +
-                            fields_log_name[3] + "\":\"" + log.Text + "\",\"" +
-                            fields_log_name[4] + "\":\"" + log.DateTime;
-                        break;
-                }
-                json_string = json_string + "\"},";
-            }
-            json_string = json_string.Substring(0, json_string.Length - 1); //remove "," of last log
-            json_string = json_string + "]}";
-            return json_string;
-        }
-
-        // Updates single use json
-        private void writeList(int i, string field, string field_value, UserForLock User)
-        {
-            if (field_value.Equals("null"))
-                field_value = null;
-            if (field.Equals(fields_user_name[0]))
-                User.CardID = field_value;
-            else if (field.Equals(fields_user_name[1]))
-                User.Expire = field_value;
-            else if (field.Equals(fields_user_name[2]))
-                User.Pin = field_value;
         }
     }
 } 
