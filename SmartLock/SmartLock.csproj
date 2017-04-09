@@ -58,6 +58,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
+    <Compile Include="WindowAccess.cs" />
+    <Compile Include="WindowTimed.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Gadgeteer" />

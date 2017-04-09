@@ -28,7 +28,7 @@ namespace SmartLock
         private string pin; // String of the pin
 
         private Window PinWindow = new Window();
-        private Window AccessWindow = new Window();
+        private WindowAccess windowAccess;
 
         // Pin Window element
         private PasswordBox pb1;
@@ -46,10 +46,6 @@ namespace SmartLock
         private Button btdel;
         private Image dataSourceImm;
 
-        // Access window elements
-        private Image accessImm;
-        private TextBlock accessTb;
-
         public Display()
         {
             // Data Setup
@@ -60,7 +56,6 @@ namespace SmartLock
             
             // Load graphical resources
             PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
-            AccessWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
         
             // Initialization
             GlideTouch.Initialize();
@@ -94,15 +89,13 @@ namespace SmartLock
             btdel.TapEvent += btdel_TapEvent;
             btac.TapEvent += btac_TapEvent;
 
-            // Load access window elements
-            accessImm = (Image) AccessWindow.GetChildByName("access_imm");
-            accessTb = (TextBlock) AccessWindow.GetChildByName("access_tb");
-
             // Set Pin window as main window
             ShowPinWindow();
 
             // Current data source is unknown
             SetDataSource(0);
+
+            windowAccess = new WindowAccess(PinWindow, 1500);
         }
 
         // Show Pin window
@@ -114,25 +107,7 @@ namespace SmartLock
         // Show Access window
         public void ShowAccessWindow(bool flagAuthorizedAccess)
         {
-            if (flagAuthorizedAccess)
-            {
-
-                accessImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_ok), Bitmap.BitmapImageType.Bmp);
-                accessTb.Text = "Access Allowed!";
-            }
-            else
-            {
-                accessImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_alt), Bitmap.BitmapImageType.Bmp);
-                accessTb.Text = "Access Denied!";
-            }
-
-            accessImm.Render(); // Adapt to imagebox
-            accessImm.Invalidate(); // Send image to display
-            accessTb.Invalidate(); // Send text to display
-            Glide.MainWindow = AccessWindow;
-
-            // Set second window for a time interval
-            timerSecondWindow.Start();
+            windowAccess.Show(flagAuthorizedAccess);
         }
 
         public void SetDataSource(int dataSource)
