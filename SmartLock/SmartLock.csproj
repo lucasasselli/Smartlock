@@ -59,6 +59,7 @@
     </Compile>
     <Compile Include="Utils.cs" />
     <Compile Include="WindowAccess.cs" />
+    <Compile Include="WindowAlert.cs" />
     <Compile Include="WindowTimed.cs" />
   </ItemGroup>
   <ItemGroup>

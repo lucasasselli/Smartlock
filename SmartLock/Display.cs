@@ -20,14 +20,12 @@ namespace SmartLock
         public event PinEventHandler PinFound;
         public delegate void PinEventHandler(string pin);
 
-        // Timers        
-        private GT.Timer timerSecondWindow; // Timer for access or denied window
-
         // Global variables
         private int numDigits; // Current number of digits inside the pin
         private string pin; // String of the pin
 
-        private Window PinWindow = new Window();
+        // TODO fixme
+        public Window PinWindow = new Window();
         private WindowAccess windowAccess;
 
         // Pin Window element
@@ -50,9 +48,6 @@ namespace SmartLock
         {
             // Data Setup
             numDigits = 0;
-
-            timerSecondWindow = new GT.Timer(timerSecondWindowCount); // 1.5 sec
-            timerSecondWindow.Tick += timerAccessWindow_Tick;
             
             // Load graphical resources
             PinWindow = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
@@ -95,6 +90,7 @@ namespace SmartLock
             // Current data source is unknown
             SetDataSource(0);
 
+            // Move outside
             windowAccess = new WindowAccess(PinWindow, 1500);
         }
 
@@ -244,13 +240,6 @@ namespace SmartLock
             pb1.Text = pin;
             pb1.Invalidate();
             numDigits = 0;
-        }
-
-        // Remove second window
-        private void timerAccessWindow_Tick(GT.Timer timerAccessWindow)
-        {
-            ShowPinWindow();
-            timerAccessWindow.Stop();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace SmartLock
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
             display.PinFound += PinFound;
-            dataHelper.DataSourceChanged += display.SetDataSource;
+            dataHelper.DataSourceChanged += DataSourceChanged;
 
             // Set initial data source
             display.SetDataSource(dataHelper.GetDataSource());
@@ -69,16 +69,14 @@ namespace SmartLock
 
         /*
          * PIN FOUND EVENT:
-         * This event occurs when the user inserts a pin code.
-         * It checks if the pin is valid and unlock the door if so.
+         * This event occurs when the user inserts a pin code. It checks if the pin is valid and unlock the door if so.
+         * If the pin has no related CardId it prompts the user to add it.
          */
         void PinFound(string pin)
         {
             // Check authorization
             bool authorized = dataHelper.CheckPin(pin);
-
-            // Show access window
-            display.ShowAccessWindow(authorized);
+            bool nullCardID = dataHelper.PinHasNullCardID(pin);
 
             // Log the event
             Log accessLog; //create a new log
@@ -94,20 +92,43 @@ namespace SmartLock
                 // Access denied
                 logText = "Pin " + pin + " inserted. Access denied!";
             }
+
+
             Debug.Print(logText);
             accessLog = new Log(2, logText, DateTime.Now.ToString());
             dataHelper.AddLog(accessLog); //add log to log list
 
-            // TODO: if UID is null ask to add card
+            if (nullCardID)
+            {
+                WindowAlert nullCardIDAlert = new WindowAlert(display.PinWindow, 10000);
+                nullCardIDAlert.setText("It happears that this user has no card.\nDo you want to scan it now?");
+                nullCardIDAlert.setPositiveButton("Yes", null);
+                nullCardIDAlert.setNegativeButton("No", null);
+                nullCardIDAlert.Show();
+            }
+            else
+            {
+                display.ShowAccessWindow(authorized);
+            }
         }
 
         /*
-         * UNLOCKDOOR
+         * UNLOCK DOOR
          * Called by either PinFound or TagFound to unlock the door.
          */
         void UnlockDoor()
         {
             //TODO
+        }
+
+        /*
+         * DATA SOURCE CHANGED EVENT:
+         * This event occurs when the data source for the user list changes.
+         */
+
+        void DataSourceChanged(int dataSource)
+        {
+            display.SetDataSource(dataSource);
         }
     }
 }

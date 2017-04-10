@@ -7,6 +7,13 @@ using GT = Gadgeteer;
 
 namespace SmartLock
 {
+    /*
+     * Abstract class to generate and display timed windows.
+     * The window must be created in an overridden constuctor and then set with the "SetWindow" method.
+     * The constructor takes two arguments: "fallbackWindow" is the window to wich the WindowTimed returs after the timer 
+     * has expired and "period" wich is the timer period.
+     */
+
     public abstract class WindowTimed
     {
         private Window fallbackWindow;
@@ -25,17 +32,24 @@ namespace SmartLock
             timerShowWindow.Tick += timerShowWindow_Tick;
         }
 
-        protected void Show()
+        // Shows the window for "period" time
+        public void Show()
         {
             Glide.MainWindow = timedWindow;
             timerShowWindow.Start();
         }
 
-        // Remove second window
-        private void timerShowWindow_Tick(GT.Timer timerAccessWindow)
+        // Dismisses the window before "period" has expired
+        public void Dismiss()
         {
             Glide.MainWindow = fallbackWindow;
             timerShowWindow.Stop();
+        }
+
+        // Remove second window
+        private void timerShowWindow_Tick(GT.Timer timerAccessWindow)
+        {
+            Dismiss();
         }
 
         protected void SetWindow(Window timedWindow){

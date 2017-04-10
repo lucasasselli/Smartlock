@@ -108,6 +108,19 @@ namespace SmartLock
             return false;
         }
 
+        public bool PinHasNullCardID(String Pin)
+        {
+            foreach (UserForLock user in userList)
+            {
+                if (String.Compare(Pin, user.Pin) == 0)
+                {
+                    return user.CardID == null;
+                }
+            }
+
+            return false;
+        }
+
         public void AddLog(Log log)
         {
             logList.Add(log);

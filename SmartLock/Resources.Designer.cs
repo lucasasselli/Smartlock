@@ -50,6 +50,7 @@ namespace SmartLock
         internal enum StringResources : short
         {
             AccessWindow = -6304,
+            AlertWindow = 135,
             PinWindow = 29358,
         }
         [System.SerializableAttribute()]

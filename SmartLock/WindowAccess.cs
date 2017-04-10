@@ -4,7 +4,7 @@ using Microsoft.SPOT;
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;
-using GT = Gadgeteer; 
+using GT = Gadgeteer;
 
 namespace SmartLock
 {
