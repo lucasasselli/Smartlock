@@ -8,14 +8,15 @@ using GT = Gadgeteer;
 
 namespace SmartLock
 {
-    public class WindowAlert : WindowTimed
+    public class AlertWindow : TimedWindow
     {
         private Button positiveButton;
         private Button negativeButton;
 
         private TextBlock alertText;
 
-        public WindowAlert(Window fallbackWindow, int period) : base(fallbackWindow, period)
+        public AlertWindow(Window fallbackWindow, int period)
+            : base(fallbackWindow, period)
         {
             Window window = new Window();
             window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AlertWindow));
@@ -32,21 +33,21 @@ namespace SmartLock
             SetWindow(window);
         }
 
-        public void setPositiveButton(String positiveText, OnPress PressedEvent)
+        public void SetPositiveButton(String positiveText, OnPress PressedEvent)
         {
             positiveButton.Visible = true;
             positiveButton.Text = positiveText;
             positiveButton.PressEvent += PressedEvent;
         }
 
-        public void setNegativeButton(String negativeText, OnPress PressedEvent)
+        public void SetNegativeButton(String negativeText, OnPress PressedEvent)
         {
             negativeButton.Visible = true;
             negativeButton.Text = negativeText;
             negativeButton.PressEvent += PressedEvent;
         }
 
-        public void setText(string alertTextString)
+        public void SetText(string alertTextString)
         {
             alertText.Visible = true;
             alertText.Text = alertTextString;

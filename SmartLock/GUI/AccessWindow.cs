@@ -8,12 +8,12 @@ using GT = Gadgeteer;
 
 namespace SmartLock
 {
-    public class WindowAccess : WindowTimed
+    public class AccessWindow : TimedWindow
     {
         private Image accessImage;
         private TextBlock accessText;
 
-        public WindowAccess(Window fallbackWindow, int period) : base(fallbackWindow, period)
+        public AccessWindow(Window fallbackWindow, int period) : base(fallbackWindow, period)
         {
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
 

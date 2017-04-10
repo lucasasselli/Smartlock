@@ -14,8 +14,14 @@ namespace SmartLock
 {
     public partial class Program
     {
+        // Constants
+        private const int WINDOW_ACCESS_PERIOD = 2000;
+        private const int WINDOW_ALERT_PERIOD = 10000;
+        
         // Main Objects
-        private Display display;
+        private PinWindow windowPin;
+        private AccessWindow accessWindow;
+        private AlertWindow scanWindow;
         private DataHelper dataHelper;
 
         public void ProgramStarted()
@@ -23,13 +29,22 @@ namespace SmartLock
             Debug.Print("Program started!");          
 
             // Object init
-            display = new Display();
+            windowPin = new PinWindow();
+            accessWindow = new AccessWindow(windowPin.window, WINDOW_ACCESS_PERIOD);
+            scanWindow = new AlertWindow(windowPin.window, WINDOW_ALERT_PERIOD);
             dataHelper = new DataHelper(ethernetJ11D, sdCard);
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
-            display.PinFound += PinFound;
+            windowPin.PinFound += PinFound;
             dataHelper.DataSourceChanged += DataSourceChanged;
+
+            // Set scan window
+            scanWindow.SetText("Please scan your NFC card now...");
+            scanWindow.SetNegativeButton("Cancel", delegate(Object target)
+            {
+                scanWindow.Dismiss();
+            });
 
             dataHelper.Init();
         }
@@ -45,7 +60,7 @@ namespace SmartLock
             bool authorized = dataHelper.CheckCardID(uid);
 
             // Show access window
-            display.ShowAccessWindow(authorized);
+            accessWindow.Show(authorized);
 
             // Log the event
             Log accessLog; //create a new log
@@ -99,18 +114,26 @@ namespace SmartLock
 
             if (nullCardID)
             {
-                WindowAlert nullCardIDAlert = new WindowAlert(display.PinWindow, 10000);
-                nullCardIDAlert.setText("It happears that this user has no card.\nDo you want to scan it now?");
-                nullCardIDAlert.setPositiveButton("Yes", null);
-                nullCardIDAlert.setNegativeButton("No", delegate(Object target)
+                // Null CardID detected, prompt the user to set one
+                AlertWindow nullCardIDAlert = new AlertWindow(windowPin.window, WINDOW_ALERT_PERIOD);
+                nullCardIDAlert.SetText("It happears that this user has no related NFC card.\nDo you want to scan it now?");
+                nullCardIDAlert.SetPositiveButton("Yes", delegate(Object target)
                 {
+                    // User wants to add a new NFC card
+                    nullCardIDAlert.StopTimer(); // Hacky solution, but prevents graphical glitches
+                    scanWindow.Show();
+                });
+                nullCardIDAlert.SetNegativeButton("No", delegate(Object target)
+                {
+                    // User doesn't want to add a new NFC card
                     nullCardIDAlert.Dismiss();
                 });
                 nullCardIDAlert.Show();
             }
             else
             {
-                display.ShowAccessWindow(authorized);
+                // Everything is fine
+                accessWindow.Show(authorized);
             }
         }
 
@@ -130,12 +153,12 @@ namespace SmartLock
 
         void DataSourceChanged(int dataSource)
         {
-            display.SetDataSource(dataSource);
+            windowPin.SetDataSource(dataSource);
             if (dataSource == DataHelper.DATA_SOURCE_ERROR)
             {
-                WindowAlert dataSourceAlert = new WindowAlert(display.PinWindow, 10000);
-                dataSourceAlert.setText("Unable to load dataset from cache! The system will remain offline until connection is established.");
-                dataSourceAlert.setPositiveButton("Ok", delegate(Object target) 
+                AlertWindow dataSourceAlert = new AlertWindow(windowPin.window, 10000);
+                dataSourceAlert.SetText("Unable to load dataset from cache! The system will remain offline until connection is established.");
+                dataSourceAlert.SetPositiveButton("Ok", delegate(Object target) 
                 {
                     dataSourceAlert.Dismiss();
                 });

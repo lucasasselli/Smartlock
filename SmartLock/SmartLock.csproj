@@ -40,7 +40,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="DataHelper.cs" />
-    <Compile Include="Display.cs" />
+    <Compile Include="GUI\PinWindow.cs" />
     <Compile Include="DatabaseAccess.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="Program.generated.cs">
@@ -58,9 +58,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
-    <Compile Include="WindowAccess.cs" />
-    <Compile Include="WindowAlert.cs" />
-    <Compile Include="WindowTimed.cs" />
+    <Compile Include="GUI\AccessWindow.cs" />
+    <Compile Include="GUI\AlertWindow.cs" />
+    <Compile Include="GUI\TimedWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Gadgeteer" />

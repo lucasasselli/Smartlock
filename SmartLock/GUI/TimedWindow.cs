@@ -8,27 +8,26 @@ using GT = Gadgeteer;
 namespace SmartLock
 {
     /*
-     * Abstract class to generate and display timed windows.
+     * Abstract wrapper class to generate and display timed windows.
      * The window must be created in an overridden constuctor and then set with the "SetWindow" method.
-     * The constructor takes two arguments: "fallbackWindow" is the window to wich the WindowTimed returs after the timer 
+     * The constructor takes two arguments: "fallbackWindow" is the window to wich the TimedWindow returs after the timer 
      * has expired and "period" wich is the timer period.
      */
 
-    public abstract class WindowTimed
+    public abstract class TimedWindow
     {
+
         private Window fallbackWindow;
         private Window timedWindow;
 
         // Timers        
         private GT.Timer timerShowWindow;
 
-        public WindowTimed(Window fallbackWindow, int period)
+        public TimedWindow(Window fallbackWindow, int period)
         {
             this.fallbackWindow = fallbackWindow;
 
-            timedWindow = new Window();
-
-            timerShowWindow = new GT.Timer(period); // 1.5 sec
+            timerShowWindow = new GT.Timer(period);
             timerShowWindow.Tick += timerShowWindow_Tick;
         }
 
@@ -46,14 +45,28 @@ namespace SmartLock
             timerShowWindow.Stop();
         }
 
+        // Makes the window static
+        public void StopTimer()
+        {
+            timerShowWindow.Stop();
+        }
+
         // Remove second window
         private void timerShowWindow_Tick(GT.Timer timerAccessWindow)
         {
             Dismiss();
         }
 
-        protected void SetWindow(Window timedWindow){
+        // Sets the wrapped window
+        public void SetWindow(Window timedWindow)
+        {
             this.timedWindow = timedWindow;
+        }
+
+        // Returns true if the window is currently being displayed
+        public bool IsShowing()
+        {
+            return timerShowWindow.IsRunning;
         }
     }
 }
