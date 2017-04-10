@@ -40,9 +40,10 @@ namespace SmartLock
         private EthernetJ11D ethernetJ11D;
 
         // Data source
-        public const int DATA_SOURCE_ERROR = 0;
-        public const int DATA_SOURCE_CACHE = 1;
-        public const int DATA_SOURCE_REMOTE = 2;
+        public const int DATA_SOURCE_UNKNOWN = 0;
+        public const int DATA_SOURCE_ERROR = 1;
+        public const int DATA_SOURCE_CACHE = 2;
+        public const int DATA_SOURCE_REMOTE = 3;
         private int dataSource;
 
         public DataHelper(EthernetJ11D ethernetJ11D, SDCard sdCard)
@@ -60,9 +61,12 @@ namespace SmartLock
             ethernetJ11D.NetworkUp += NetworkUp;
             ethernetJ11D.NetworkDown += NetworkDown;
 
-            // Data source is now error
-            ChangeDataSource(DATA_SOURCE_ERROR);
+            // Data is not yet loaded, data source is unknown
+            ChangeDataSource(DATA_SOURCE_UNKNOWN);
+        }
 
+        public void Init()
+        {
             // Load users from cache
             if (cacheAccess.LoadUsers(tempUserList))
             {
@@ -71,6 +75,11 @@ namespace SmartLock
 
                 // Data source is now cache
                 ChangeDataSource(DATA_SOURCE_CACHE);
+            }
+            else
+            {
+                // Empty data cache is assumed as an error!
+                DataSourceChanged(DATA_SOURCE_ERROR);
             }
 
             // Load logs from cache if any
@@ -260,7 +269,7 @@ namespace SmartLock
          * DATA SOURCE:
          * The attribute dataSorce stores the source of the user data currently being used.
          * dataSource is determinred according to the following rules:
-         * - If the data is not being loaded, dataSource is DATA_SOURCE_ERROR
+         * - If the data is not being loaded, dataSource is DATA_SOURCE_UNKNOWN
          * - If the network is down, dataSource is DATA_SOURCE_CACHE
          * - If the network id up and last ServerRoutine was succesfull, dataSource is DATA_SOURCE_REMOTE
          * - In any other case, dataSource is DATA_SOURCE_CACHE
@@ -269,11 +278,16 @@ namespace SmartLock
         // Changes the current data source and throws event DataSourceChanged
         private void ChangeDataSource(int dataSource)
         {
-            this.dataSource = dataSource;
-            if (DataSourceChanged != null)
+            if (this.dataSource != dataSource)
             {
-                DataSourceChanged(dataSource);
+                // Notify the event only if the data has actually changed!
+                if (DataSourceChanged != null)
+                {
+                    DataSourceChanged(dataSource);
+                }
             }
+
+            this.dataSource = dataSource;
         }
 
         // Returns the current data source

@@ -31,8 +31,7 @@ namespace SmartLock
             display.PinFound += PinFound;
             dataHelper.DataSourceChanged += DataSourceChanged;
 
-            // Set initial data source
-            display.SetDataSource(dataHelper.GetDataSource());
+            dataHelper.Init();
         }
 
         /*
@@ -103,7 +102,10 @@ namespace SmartLock
                 WindowAlert nullCardIDAlert = new WindowAlert(display.PinWindow, 10000);
                 nullCardIDAlert.setText("It happears that this user has no card.\nDo you want to scan it now?");
                 nullCardIDAlert.setPositiveButton("Yes", null);
-                nullCardIDAlert.setNegativeButton("No", null);
+                nullCardIDAlert.setNegativeButton("No", delegate(Object target)
+                {
+                    nullCardIDAlert.Dismiss();
+                });
                 nullCardIDAlert.Show();
             }
             else
@@ -129,6 +131,16 @@ namespace SmartLock
         void DataSourceChanged(int dataSource)
         {
             display.SetDataSource(dataSource);
+            if (dataSource == DataHelper.DATA_SOURCE_ERROR)
+            {
+                WindowAlert dataSourceAlert = new WindowAlert(display.PinWindow, 10000);
+                dataSourceAlert.setText("Unable to load dataset from cache! The system will remain offline until connection is established.");
+                dataSourceAlert.setPositiveButton("Ok", delegate(Object target) 
+                {
+                    dataSourceAlert.Dismiss();
+                });
+                dataSourceAlert.Show();
+            }
         }
     }
 }
