@@ -102,6 +102,9 @@ namespace SmartLock
                     "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".", 
                     DateTime.Now.ToString());
 
+                // Update CardID in userList
+                dataHelper.AddCardID(pendingPin, uid);
+
                 dataHelper.AddLog(newCardIDLog);
 
                 AlertWindow cardAddedAlert = new AlertWindow(10000);
@@ -207,7 +210,6 @@ namespace SmartLock
         {
             if (visibility)
             {
-                // PinWindow is visible
                 adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
             }
             else
@@ -218,5 +220,4 @@ namespace SmartLock
         }
     }
 }
-
 

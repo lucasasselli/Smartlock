@@ -52,7 +52,6 @@ namespace SmartLock
             cacheAccess = new CacheAccess(sdCard);
             databaseAccess = new DatabaseAccess();
 
-            threadRoutine = new Thread(new ThreadStart(ServerRoutine));
             threadWaitForStop = new ManualResetEvent(false);
 
             this.ethernetJ11D = ethernetJ11D;
@@ -123,11 +122,39 @@ namespace SmartLock
             {
                 if (String.Compare(Pin, user.Pin) == 0)
                 {
-                    return user.CardID == null;
+                    if (user.CardID != null)
+                    {
+                        if(String.Compare(String.Empty, user.Pin) == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
             }
 
             return false;
+        }
+
+        public void AddCardID(string pin, string cardID)
+        {
+            foreach(UserForLock user in userList){
+                if (user.Pin == pin)
+                {
+                    user.CardID = cardID;
+                    break;
+                }
+            }
+
+            // Update cache copy
+            cacheAccess.StoreUsers(userList);
         }
 
         public void AddLog(Log log)
@@ -256,13 +283,23 @@ namespace SmartLock
         public void StartRoutine()
         {
             threadRunning = true;
-            if (!threadRoutine.IsAlive)
+
+            if (threadRoutine != null)
             {
-                threadRoutine.Start();
+                if (!threadRoutine.IsAlive)
+                {
+                    threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+                    threadRoutine.Start();
+                }
+                else
+                {
+                    threadWaitForStop.Set();
+                }
             }
             else
             {
-                threadWaitForStop.Set();
+                threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+                threadRoutine.Start();
             }
         }
 

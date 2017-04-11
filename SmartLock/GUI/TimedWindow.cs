@@ -20,7 +20,7 @@ namespace SmartLock.GUI
         public TimedWindow(int period)
         {
             timerShowWindow = new GT.Timer(period);
-            timerShowWindow.Tick += timerShowWindow_Tick;
+            timerShowWindow.Tick += new GT.Timer.TickEventHandler(timerShowWindow_Tick);
         }
 
         // Shows the window for "period" time
