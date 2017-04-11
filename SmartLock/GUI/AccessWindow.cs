@@ -1,19 +1,17 @@
-using System;
 using Microsoft.SPOT;
 
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;
-using GT = Gadgeteer;
 
-namespace SmartLock
+namespace SmartLock.GUI
 {
     public class AccessWindow : TimedWindow
     {
         private Image accessImage;
         private TextBlock accessText;
 
-        public AccessWindow(Window fallbackWindow, int period) : base(fallbackWindow, period)
+        public AccessWindow(int period) : base(period)
         {
             Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
 

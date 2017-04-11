@@ -1,11 +1,7 @@
-using System;
-using Microsoft.SPOT;
-
-using GHI.Glide;
 using GHI.Glide.Display;
 using GT = Gadgeteer; 
 
-namespace SmartLock
+namespace SmartLock.GUI
 {
     /*
      * Abstract wrapper class to generate and display timed windows.
@@ -16,17 +12,13 @@ namespace SmartLock
 
     public abstract class TimedWindow
     {
-
-        private Window fallbackWindow;
         private Window timedWindow;
 
         // Timers        
         private GT.Timer timerShowWindow;
 
-        public TimedWindow(Window fallbackWindow, int period)
+        public TimedWindow(int period)
         {
-            this.fallbackWindow = fallbackWindow;
-
             timerShowWindow = new GT.Timer(period);
             timerShowWindow.Tick += timerShowWindow_Tick;
         }
@@ -34,14 +26,14 @@ namespace SmartLock
         // Shows the window for "period" time
         public void Show()
         {
-            Glide.MainWindow = timedWindow;
+            WindowManger.ShowWindow(timedWindow);
             timerShowWindow.Start();
         }
 
         // Dismisses the window before "period" has expired
         public void Dismiss()
         {
-            Glide.MainWindow = fallbackWindow;
+            WindowManger.ShowMainWindow();
             timerShowWindow.Stop();
         }
 

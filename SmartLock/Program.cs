@@ -9,6 +9,7 @@ using GHI.Glide.Display;
 using GT = Gadgeteer; 
 using Gadgeteer.Modules.GHIElectronics;
 using Gadgeteer.Modules.Luca_Sasselli;
+using SmartLock.GUI;
 
 namespace SmartLock
 {
@@ -21,7 +22,7 @@ namespace SmartLock
         private const int NFC_SCAN_TIMEOUT = 200;
         
         // Main Objects
-        private PinWindow windowPin;
+        private PinWindow pinWindow;
         private AccessWindow accessWindow;
         private AlertWindow scanWindow;
         private DataHelper dataHelper;
@@ -34,14 +35,14 @@ namespace SmartLock
             Debug.Print("Program started!");          
 
             // Object init
-            windowPin = new PinWindow();
-            accessWindow = new AccessWindow(windowPin.window, WINDOW_ACCESS_PERIOD);
-            scanWindow = new AlertWindow(windowPin.window, WINDOW_ALERT_PERIOD);
+            pinWindow = new PinWindow();
+            accessWindow = new AccessWindow(WINDOW_ACCESS_PERIOD);
+            scanWindow = new AlertWindow(WINDOW_ALERT_PERIOD);
             dataHelper = new DataHelper(ethernetJ11D, sdCard);
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
-            windowPin.PinFound += PinFound;
+            pinWindow.PinFound += PinFound;
             dataHelper.DataSourceChanged += DataSourceChanged;
 
             // Set scan window
@@ -52,7 +53,10 @@ namespace SmartLock
             });
 
             dataHelper.Init();
-            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
+
+            WindowManger.MainWindow = pinWindow.Window;
+            WindowManger.VisibilityChanged += PinWindowVisible;
+            WindowManger.ShowMainWindow();
         }
 
         /*
@@ -62,9 +66,6 @@ namespace SmartLock
          */
         void TagFound(string uid)
         {
-            // Stop the NFC scanning to prevent conflicts
-            adafruit_PN532.StopScan();
-
             if (!scanWindow.IsShowing())
             {
                 // Check authorization
@@ -103,7 +104,7 @@ namespace SmartLock
 
                 dataHelper.AddLog(newCardIDLog);
 
-                AlertWindow cardAddedAlert = new AlertWindow(windowPin.window, 10000);
+                AlertWindow cardAddedAlert = new AlertWindow(10000);
                 cardAddedAlert.SetText("NFC card added!");
                 cardAddedAlert.SetPositiveButton("Ok", delegate(Object target)
                 {
@@ -111,9 +112,6 @@ namespace SmartLock
                 });
                 cardAddedAlert.Show();
             }
-
-            // Everything is done, resume scanning.
-            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
         }
 
         /*
@@ -123,9 +121,6 @@ namespace SmartLock
          */
         void PinFound(string pin)
         {
-            // Stop the NFC scanning to prevent conflicts
-            adafruit_PN532.StopScan();
-
             // Check authorization
             bool authorized = dataHelper.CheckPin(pin);
             bool nullCardID = dataHelper.PinHasNullCardID(pin);
@@ -152,7 +147,7 @@ namespace SmartLock
             if (nullCardID)
             {
                 // Null CardID detected, prompt the user to set one
-                AlertWindow nullCardIDAlert = new AlertWindow(windowPin.window, WINDOW_ALERT_PERIOD);
+                AlertWindow nullCardIDAlert = new AlertWindow(WINDOW_ALERT_PERIOD);
                 nullCardIDAlert.SetText("It happears that this user has no related NFC card.\nDo you want to scan it now?");
                 nullCardIDAlert.SetPositiveButton("Yes", delegate(Object target)
                 {
@@ -173,9 +168,6 @@ namespace SmartLock
                 // Everything is fine
                 accessWindow.Show(authorized);
             }
-
-            // Everything is done, resume scanning.
-            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
         }
 
         /*
@@ -191,19 +183,37 @@ namespace SmartLock
          * DATA SOURCE CHANGED EVENT:
          * This event occurs when the data source for the user list changes.
          */
-
         void DataSourceChanged(int dataSource)
         {
-            windowPin.SetDataSource(dataSource);
+            pinWindow.SetDataSource(dataSource);
             if (dataSource == DataHelper.DATA_SOURCE_ERROR)
             {
-                AlertWindow dataSourceAlert = new AlertWindow(windowPin.window, 10000);
+                AlertWindow dataSourceAlert = new AlertWindow(10000);
                 dataSourceAlert.SetText("Unable to load dataset from cache! The system will remain offline until connection is established.");
                 dataSourceAlert.SetPositiveButton("Ok", delegate(Object target) 
                 {
                     dataSourceAlert.Dismiss();
                 });
                 dataSourceAlert.Show();
+            }
+        }
+
+        /*
+         * PIN WINDOW VISIBLE EVENT:
+         * This event occours when the visibility of pinWindow changes.
+         */
+
+        void PinWindowVisible(bool visibility)
+        {
+            if (visibility)
+            {
+                // PinWindow is visible
+                adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
+            }
+            else
+            {
+                // Pin window not visible
+                adafruit_PN532.StopScan();
             }
         }
     }

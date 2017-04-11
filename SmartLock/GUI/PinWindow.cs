@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
-using System.Threading;
 using Microsoft.SPOT;
 
 using GHI.Glide;
 using GHI.Glide.Display;
 using GHI.Glide.UI;
-using GT = Gadgeteer; 
 
-namespace SmartLock
+namespace SmartLock.GUI
 {
     public class PinWindow
     {
@@ -24,7 +21,7 @@ namespace SmartLock
         private int numDigits; // Current number of digits inside the pin
         private string pin; // String of the pin
 
-        public Window window = new Window();
+        public Window Window { get; private set; }
 
         // Pin Window element
         private PasswordBox pb1;
@@ -48,26 +45,26 @@ namespace SmartLock
             numDigits = 0;
             
             // Load graphical resources
-            window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
+            Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
         
             // Initialization
             GlideTouch.Initialize();
 
             // Load pin window elements
-            bt0 = (Button) window.GetChildByName("b0");
-            bt1 = (Button) window.GetChildByName("b1");
-            bt2 = (Button) window.GetChildByName("b2");
-            bt3 = (Button) window.GetChildByName("b3");
-            bt4 = (Button) window.GetChildByName("b4");
-            bt5 = (Button) window.GetChildByName("b5");
-            bt6 = (Button) window.GetChildByName("b6");
-            bt7 = (Button) window.GetChildByName("b7");
-            bt8 = (Button) window.GetChildByName("b8");
-            bt9 = (Button) window.GetChildByName("b9");
-            btdel = (Button) window.GetChildByName("bdel");
-            btac = (Button) window.GetChildByName("bac");
-            pb1 = (PasswordBox) window.GetChildByName("p1");
-            dataSourceImm = (Image)window.GetChildByName("data_source");
+            bt0 = (Button) Window.GetChildByName("b0");
+            bt1 = (Button) Window.GetChildByName("b1");
+            bt2 = (Button) Window.GetChildByName("b2");
+            bt3 = (Button) Window.GetChildByName("b3");
+            bt4 = (Button) Window.GetChildByName("b4");
+            bt5 = (Button) Window.GetChildByName("b5");
+            bt6 = (Button) Window.GetChildByName("b6");
+            bt7 = (Button) Window.GetChildByName("b7");
+            bt8 = (Button) Window.GetChildByName("b8");
+            bt9 = (Button) Window.GetChildByName("b9");
+            btdel = (Button) Window.GetChildByName("bdel");
+            btac = (Button) Window.GetChildByName("bac");
+            pb1 = (PasswordBox) Window.GetChildByName("p1");
+            dataSourceImm = (Image)Window.GetChildByName("data_source");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -82,17 +79,8 @@ namespace SmartLock
             btdel.TapEvent += btdel_TapEvent;
             btac.TapEvent += btac_TapEvent;
 
-            // Set Pin window as main window
-            Showwindow();
-
             // Current data source is unknown
             SetDataSource(DataHelper.DATA_SOURCE_UNKNOWN);
-        }
-
-        // Show Pin window
-        public void Showwindow()
-        {
-            Glide.MainWindow = window;
         }
 
         public void SetDataSource(int dataSource)
