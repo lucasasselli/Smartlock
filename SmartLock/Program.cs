@@ -17,12 +17,17 @@ namespace SmartLock
         // Constants
         private const int WINDOW_ACCESS_PERIOD = 2000;
         private const int WINDOW_ALERT_PERIOD = 10000;
+        private const int NFC_SCAN_PERIOD = 1000;
+        private const int NFC_SCAN_TIMEOUT = 200;
         
         // Main Objects
         private PinWindow windowPin;
         private AccessWindow accessWindow;
         private AlertWindow scanWindow;
         private DataHelper dataHelper;
+
+        // Nfc setup
+        private string pendingPin;
 
         public void ProgramStarted()
         {
@@ -47,6 +52,7 @@ namespace SmartLock
             });
 
             dataHelper.Init();
+            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
         }
 
         /*
@@ -56,29 +62,58 @@ namespace SmartLock
          */
         void TagFound(string uid)
         {
-            // Check authorization
-            bool authorized = dataHelper.CheckCardID(uid);
+            // Stop the NFC scanning to prevent conflicts
+            adafruit_PN532.StopScan();
 
-            // Show access window
-            accessWindow.Show(authorized);
-
-            // Log the event
-            Log accessLog; //create a new log
-            string logText;
-            if (authorized)
+            if (!scanWindow.IsShowing())
             {
-                // Access granted
-                UnlockDoor();
-                logText = "Card " + uid + " inserted. Authorized access.";
+                // Check authorization
+                bool authorized = dataHelper.CheckCardID(uid);
+
+                // Show access window
+                accessWindow.Show(authorized);
+
+                // Log the event
+                string logText;
+                if (authorized)
+                {
+                    // Access granted
+                    UnlockDoor();
+                    logText = "Card \"" + uid + "\" inserted. Authorized access.";
+                }
+                else
+                {
+                    // Access denied
+                    logText = "Card \"" + uid + "\" inserted. Access denied!";
+                }
+
+                Debug.Print(logText);
+                Log accessLog = new Log(Log.TYPE_ACCESS, uid, logText, DateTime.Now.ToString());
+                dataHelper.AddLog(accessLog); //add log to log list
             }
             else
             {
-                // Access denied
-                logText = "Card " + uid + " inserted. Access denied!";
+                // Log new cardID
+                Log newCardIDLog = new Log(
+                    Log.TYPE_ACCESS, 
+                    pendingPin, 
+                    uid, 
+                    "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".", 
+                    DateTime.Now.ToString());
+
+                dataHelper.AddLog(newCardIDLog);
+
+                AlertWindow cardAddedAlert = new AlertWindow(windowPin.window, 10000);
+                cardAddedAlert.SetText("NFC card added!");
+                cardAddedAlert.SetPositiveButton("Ok", delegate(Object target)
+                {
+                    cardAddedAlert.Dismiss();
+                });
+                cardAddedAlert.Show();
             }
-            Debug.Print(logText);
-            accessLog = new Log(2, logText, DateTime.Now.ToString());
-            dataHelper.AddLog(accessLog); //add log to log list
+
+            // Everything is done, resume scanning.
+            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
         }
 
         /*
@@ -88,28 +123,30 @@ namespace SmartLock
          */
         void PinFound(string pin)
         {
+            // Stop the NFC scanning to prevent conflicts
+            adafruit_PN532.StopScan();
+
             // Check authorization
             bool authorized = dataHelper.CheckPin(pin);
             bool nullCardID = dataHelper.PinHasNullCardID(pin);
 
             // Log the event
-            Log accessLog; //create a new log
             string logText;
             if (authorized)
             {
                 // Access granted
                 UnlockDoor();
-                logText = "Pin " + pin + " inserted. Authorized access.";
+                logText = "Pin \"" + pin + "\" inserted. Authorized access.";
             }
             else
             {
                 // Access denied
-                logText = "Pin " + pin + " inserted. Access denied!";
+                logText = "Pin \"" + pin + "\" inserted. Access denied!";
             }
 
 
             Debug.Print(logText);
-            accessLog = new Log(2, logText, DateTime.Now.ToString());
+            Log accessLog = new Log(Log.TYPE_ACCESS, pin, logText, DateTime.Now.ToString());
             dataHelper.AddLog(accessLog); //add log to log list
 
             if (nullCardID)
@@ -120,6 +157,7 @@ namespace SmartLock
                 nullCardIDAlert.SetPositiveButton("Yes", delegate(Object target)
                 {
                     // User wants to add a new NFC card
+                    pendingPin = pin;
                     nullCardIDAlert.StopTimer(); // Hacky solution, but prevents graphical glitches
                     scanWindow.Show();
                 });
@@ -135,6 +173,9 @@ namespace SmartLock
                 // Everything is fine
                 accessWindow.Show(authorized);
             }
+
+            // Everything is done, resume scanning.
+            adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
         }
 
         /*

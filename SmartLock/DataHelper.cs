@@ -241,9 +241,15 @@ namespace SmartLock
 
                 // Plan next connection
                 if (dataSource != DATA_SOURCE_REMOTE && ethernetJ11D.IsNetworkUp)
+                {
                     threadWaitForStop.WaitOne(THREAD_PERIOD_SHORT, true);
+                }
                 else
+                {
                     threadWaitForStop.WaitOne(THREAD_PERIOD_LONG, true);
+                }
+
+                threadWaitForStop.Reset();
             }
         }
 
