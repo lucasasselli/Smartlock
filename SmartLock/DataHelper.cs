@@ -124,7 +124,7 @@ namespace SmartLock
                 {
                     if (user.CardID != null)
                     {
-                        if(String.Compare(String.Empty, user.Pin) == 0)
+                        if(String.Compare(String.Empty, user.CardID) == 0)
                         {
                             return true;
                         }
