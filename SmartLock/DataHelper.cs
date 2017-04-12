@@ -1,49 +1,45 @@
-using System;
 using System.Collections;
 using System.Threading;
-
+using Gadgeteer.Modules.GHIElectronics;
 using Microsoft.SPOT;
-
-using Gadgeteer.Networking;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
-using Gadgeteer.Modules.GHIElectronics;
 
 namespace SmartLock
 {
-    class DataHelper
+    internal class DataHelper
     {
-        // Main data object
-        private ArrayList userList = new ArrayList();
-        private ArrayList logList = new ArrayList();
+        public delegate void DsChangedEventHandler(int dataSource);
 
-        // Temp holders (CLEAN BEFORE USE!)
-        private ArrayList tempUserList = new ArrayList();
-        private ArrayList tempLogList = new ArrayList();
+        private const int ThreadPeriodLong = 120000; // milliseconds -> 2 min
+        private const int ThreadPeriodShort = 10000; // milliseconds -> 10 sec
+
+        // Data source
+        public const int DataSourceUnknown = 0;
+        public const int DataSourceError = 1;
+        public const int DataSourceCache = 2;
+        public const int DataSourceRemote = 3;
 
         // Wrapped classes
-        CacheAccess cacheAccess;
-        DatabaseAccess databaseAccess;
+        private readonly CacheAccess cacheAccess;
+        private readonly DatabaseAccess databaseAccess;
+
+        // Ethernet object
+        private readonly EthernetJ11D ethernetJ11D;
+
+        // Main data object
+        private readonly ArrayList logList = new ArrayList();
+        private readonly ArrayList userList = new ArrayList();
+
+        // Temp holders (CLEAN BEFORE USE!)
+        private readonly ArrayList tempLogList = new ArrayList();
+        private readonly ArrayList tempUserList = new ArrayList();
 
         // Thread
         private bool threadRunning;
         private Thread threadRoutine;
-        private ManualResetEvent threadWaitForStop;
-        private const int THREAD_PERIOD_LONG = 120000; // milliseconds -> 2 min
-        private const int THREAD_PERIOD_SHORT = 10000; // milliseconds -> 10 sec
+        private readonly ManualResetEvent threadWaitForStop;
 
-        // Event handling
-        public event DSChangedEventHandler DataSourceChanged;
-        public delegate void DSChangedEventHandler(int dataSource);
-
-        // Ethernet object
-        private EthernetJ11D ethernetJ11D;
-
-        // Data source
-        public const int DATA_SOURCE_UNKNOWN = 0;
-        public const int DATA_SOURCE_ERROR = 1;
-        public const int DATA_SOURCE_CACHE = 2;
-        public const int DATA_SOURCE_REMOTE = 3;
         private int dataSource;
 
         public DataHelper(EthernetJ11D ethernetJ11D, SDCard sdCard)
@@ -61,8 +57,11 @@ namespace SmartLock
             ethernetJ11D.NetworkDown += NetworkDown;
 
             // Data is not yet loaded, data source is unknown
-            ChangeDataSource(DATA_SOURCE_UNKNOWN);
+            ChangeDataSource(DataSourceUnknown);
         }
+
+        // Event handling
+        public event DsChangedEventHandler DataSourceChanged;
 
         public void Init()
         {
@@ -73,12 +72,12 @@ namespace SmartLock
                 Utils.ArrayListCopy(tempUserList, userList);
 
                 // Data source is now cache
-                ChangeDataSource(DATA_SOURCE_CACHE);
+                ChangeDataSource(DataSourceCache);
             }
             else
             {
                 // Empty data cache is assumed as an error!
-                DataSourceChanged(DATA_SOURCE_ERROR);
+                if (DataSourceChanged != null) DataSourceChanged(DataSourceError);
             }
 
             // Load logs from cache if any
@@ -90,68 +89,47 @@ namespace SmartLock
         }
 
         // Access Management
-        public bool CheckCardID(String CardID)
+        public bool CheckCardId(string cardId)
         {
             foreach (UserForLock user in userList)
-            {
-                if (String.Compare(CardID, user.CardID) == 0)
-                {
+                if (string.Compare(cardId, user.CardID) == 0)
                     return true;
-                }
-            }
 
             return false;
         }
 
-        public bool CheckPin(String Pin)
+        public bool CheckPin(string pin)
         {
             foreach (UserForLock user in userList)
-            {
-                if (String.Compare(Pin, user.Pin) == 0)
-                {
+                if (string.Compare(pin, user.Pin) == 0)
                     return true;
-                }
-            }
 
             return false;
         }
 
-        public bool PinHasNullCardID(String Pin)
+        public bool PinHasNullCardId(string pin)
         {
             foreach (UserForLock user in userList)
-            {
-                if (String.Compare(Pin, user.Pin) == 0)
-                {
+                if (string.Compare(pin, user.Pin) == 0)
                     if (user.CardID != null)
-                    {
-                        if(String.Compare(String.Empty, user.CardID) == 0)
-                        {
+                        if (string.Compare(string.Empty, user.CardID) == 0)
                             return true;
-                        }
                         else
-                        {
                             return false;
-                        }
-                    }
                     else
-                    {
                         return true;
-                    }
-                }
-            }
 
             return false;
         }
 
-        public void AddCardID(string pin, string cardID)
+        public void AddCardId(string pin, string cardId)
         {
-            foreach(UserForLock user in userList){
+            foreach (UserForLock user in userList)
                 if (user.Pin == pin)
                 {
-                    user.CardID = cardID;
+                    user.CardID = cardId;
                     break;
                 }
-            }
 
             // Update cache copy
             cacheAccess.StoreUsers(userList);
@@ -173,7 +151,6 @@ namespace SmartLock
 
             // Start ServerRoutine
             StartRoutine();
-
         }
 
         // Network is offline event
@@ -183,13 +160,9 @@ namespace SmartLock
 
             // Data source is now cache
             if (userList.Count > 0)
-            {
-                ChangeDataSource(DATA_SOURCE_CACHE);
-            }
+                ChangeDataSource(DataSourceCache);
             else
-            {
-                ChangeDataSource(DATA_SOURCE_ERROR);
-            }
+                ChangeDataSource(DataSourceError);
 
             // Stop ServerRoutine
             StopRoutine();
@@ -224,7 +197,7 @@ namespace SmartLock
                         cacheAccess.StoreUsers(userList);
 
                         // Data source is now remote
-                        ChangeDataSource(DATA_SOURCE_REMOTE);
+                        ChangeDataSource(DataSourceRemote);
 
                         Debug.Print(userList.Count + " users received from server");
                     }
@@ -234,13 +207,9 @@ namespace SmartLock
 
                         // Data source is now cache
                         if (userList.Count > 0)
-                        {
-                            ChangeDataSource(DATA_SOURCE_CACHE);
-                        }
+                            ChangeDataSource(DataSourceCache);
                         else
-                        {
-                            ChangeDataSource(DATA_SOURCE_ERROR);
-                        }
+                            ChangeDataSource(DataSourceError);
                     }
 
                     if (logList.Count > 0)
@@ -267,14 +236,10 @@ namespace SmartLock
                 }
 
                 // Plan next connection
-                if (dataSource != DATA_SOURCE_REMOTE && ethernetJ11D.IsNetworkUp)
-                {
-                    threadWaitForStop.WaitOne(THREAD_PERIOD_SHORT, true);
-                }
+                if (dataSource != DataSourceRemote && ethernetJ11D.IsNetworkUp)
+                    threadWaitForStop.WaitOne(ThreadPeriodShort, true);
                 else
-                {
-                    threadWaitForStop.WaitOne(THREAD_PERIOD_LONG, true);
-                }
+                    threadWaitForStop.WaitOne(ThreadPeriodLong, true);
 
                 threadWaitForStop.Reset();
             }
@@ -288,7 +253,7 @@ namespace SmartLock
             {
                 if (!threadRoutine.IsAlive)
                 {
-                    threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+                    threadRoutine = new Thread(ServerRoutine);
                     threadRoutine.Start();
                 }
                 else
@@ -298,7 +263,7 @@ namespace SmartLock
             }
             else
             {
-                threadRoutine = new Thread(new ThreadStart(ServerRoutine));
+                threadRoutine = new Thread(ServerRoutine);
                 threadRoutine.Start();
             }
         }
@@ -322,13 +287,8 @@ namespace SmartLock
         private void ChangeDataSource(int dataSource)
         {
             if (this.dataSource != dataSource)
-            {
-                // Notify the event only if the data has actually changed!
                 if (DataSourceChanged != null)
-                {
                     DataSourceChanged(dataSource);
-                }
-            }
 
             this.dataSource = dataSource;
         }

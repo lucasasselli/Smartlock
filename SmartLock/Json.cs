@@ -1,18 +1,15 @@
 using System;
 using System.Collections;
-using System.Reflection;
-
-using Microsoft.SPOT;
-
 using Json.NETMF;
+using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    class Json
+    internal class Json
     {
         public static bool ParseNamedArray(string arrayName, string jsonStr, ArrayList list, Type objType)
         {
-            Hashtable initHash = JsonSerializer.DeserializeString(jsonStr) as Hashtable;
+            var initHash = JsonSerializer.DeserializeString(jsonStr) as Hashtable;
 
             if (initHash == null)
             {
@@ -20,7 +17,7 @@ namespace SmartLock
                 return false;
             }
 
-            ArrayList hashList = (ArrayList)initHash[arrayName];
+            var hashList = (ArrayList) initHash[arrayName];
 
             if (hashList == null)
             {
@@ -32,36 +29,38 @@ namespace SmartLock
             {
                 foreach (Hashtable hash in hashList)
                 {
-                    MethodInfo[] methods = objType.GetMethods();
+                    var methods = objType.GetMethods();
 
                     // Construct new object of type objType
-                    Object obj = objType.GetConstructor(new Type[0]).Invoke(new Object[0]);
-
-                    foreach (MethodInfo method in methods)
+                    var constructorInfo = objType.GetConstructor(new Type[0]);
+                    if (constructorInfo != null)
                     {
-                        string methodName = method.Name;
-                        if (methodName.Length > 5)
+                        var obj = constructorInfo.Invoke(new object[0]);
+
+                        foreach (var method in methods)
                         {
-                            string prefix = methodName.Substring(0, 4);
-                            if (String.Compare(prefix, "set_") == 0)
+                            var methodName = method.Name;
+                            if (methodName.Length > 5)
                             {
-                                // Is a setter
-                                string fieldName = methodName.Substring(4);
-                                object objFromHash = hash[fieldName];
-                                if (objFromHash != null)
+                                var prefix = methodName.Substring(0, 4);
+                                if (string.Compare(prefix, "set_") == 0)
                                 {
-                                    method.Invoke(obj, new object[] { objFromHash });
+                                    // Is a setter
+                                    var fieldName = methodName.Substring(4);
+                                    var objFromHash = hash[fieldName];
+                                    if (objFromHash != null)
+                                        method.Invoke(obj, new[] {objFromHash});
                                 }
                             }
                         }
-                    }
 
-                    list.Add(obj);
+                        list.Add(obj);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Debug.Print("Error parsing JSON list!");
+                Debug.Print("ERROR: exception while parsing JSON list: " + e);
                 return false;
             }
 
@@ -70,11 +69,10 @@ namespace SmartLock
 
         public static string BuildNamedArray(string arrayName, ArrayList list)
         {
-            Hashtable hash = new Hashtable();
+            var hash = new Hashtable();
             hash.Add(arrayName, list);
 
             return JsonSerializer.SerializeObject(hash);
-
         }
     }
 }

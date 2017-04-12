@@ -1,11 +1,9 @@
 using System;
-using Microsoft.SPOT;
 
 namespace SmartLock
 {
     /*
      * NOTE: Serializizable class attribute allows object serialization!
-     * 
      * DO NOT REMOVE OR EDIT!
      */
 
@@ -20,15 +18,15 @@ namespace SmartLock
     [Serializable]
     public class Log
     {
-        public const int TYPE_ACCESS = 1;
-        public const int TYPE_INFO = 2;
-        public const int TYPE_ERROR = 4;
+        public const int TypeAccess = 1;
+        public const int TypeInfo = 2;
+        public const int TypeError = 4;
 
-        public Log(int type, string pin, string cardID, string text, string dateTime) 
+        public Log(int type, string pin, string cardId, string text, string dateTime) 
         {
             Type = type;
             Pin = pin;
-            CardID = cardID;
+            CardID = cardId;
             Text = text;
             DateTime = dateTime;
         }

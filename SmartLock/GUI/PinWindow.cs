@@ -62,7 +62,7 @@ namespace SmartLock.GUI
             btac.TapEvent += btac_TapEvent;
 
             // Current data source is unknown
-            SetDataSource(DataHelper.DATA_SOURCE_UNKNOWN);
+            SetDataSource(DataHelper.DataSourceUnknown);
         }
 
         // Event handling
@@ -72,12 +72,12 @@ namespace SmartLock.GUI
         {
             switch (dataSource)
             {
-                case DataHelper.DATA_SOURCE_CACHE:
+                case DataHelper.DataSourceCache:
                     dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_cache),
                         Bitmap.BitmapImageType.Bmp);
                     break;
 
-                case DataHelper.DATA_SOURCE_REMOTE:
+                case DataHelper.DataSourceRemote:
                     dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_remote),
                         Bitmap.BitmapImageType.Bmp);
                     break;

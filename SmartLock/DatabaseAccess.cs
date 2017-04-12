@@ -1,59 +1,48 @@
 using System;
-using System.IO;
 using System.Collections;
-using System.Threading;
+using System.IO;
 using System.Net;
 using System.Text;
-
 using Microsoft.SPOT;
-using Microsoft.SPOT.Hardware;
-
-using Gadgeteer.Networking;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
-using Gadgeteer.Modules.GHIElectronics;
 
 namespace SmartLock
 {
-    // This will most likely substitute ServerAccess
     public class DatabaseAccess
     {
         // Request + JSON stuff
-        private const string ServerIP = "192.168.1.101";
+        private const string ServerIp = "192.168.1.101";
         private const string ServerPort = "8000";
-        private const string GadgeteerID = "1";
-        private const string URL = "http://" + ServerIP + ":" + ServerPort + "/SmartLockRESTService/data/?id=" + GadgeteerID; 
+        private const string GadgeteerId = "1";
+        private const string Url = "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/data/?id=" +GadgeteerId;
         private const string UserHeader = "AllowedUsers";
-        private static string[] fields_user_name = { "CardID", "Expire", "Pin" };
         private const string LogHeader = "Log";
 
         // Loads userlist from db
         public bool RequestUsers(ArrayList userList)
         {
-            HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
+            var request = WebRequest.Create(Url) as HttpWebRequest;
             try
             {
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    if (response.StatusCode == HttpStatusCode.OK)
+                if (request != null)
+                    using (var response = request.GetResponse() as HttpWebResponse)
                     {
-                        Stream response_stream = response.GetResponseStream();
-                        StreamReader response_reader = new StreamReader(response_stream);
-                        string response_string = response_reader.ReadToEnd();
-                        response_stream.Close();
-                        response_reader.Close();
-                        if (!Json.ParseNamedArray(UserHeader, response_string, userList, typeof(UserForLock)))
+                        if (response != null && response.StatusCode == HttpStatusCode.OK)
                         {
-                            return false;
+                            var responseStream = response.GetResponseStream();
+                            var responseReader = new StreamReader(responseStream);
+                            var responseString = responseReader.ReadToEnd();
+                            responseStream.Close();
+                            responseReader.Close();
+                            if (!Json.ParseNamedArray(UserHeader, responseString, userList, typeof(UserForLock)))
+                                return false;
                         }
                     }
-
-                    Debug.Print("Response is: " + response.StatusCode.ToString());
-                }
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while getting user list: " + e.ToString());
+                Debug.Print("ERROR: Exception while getting user list: " + e);
                 return false;
             }
 
@@ -63,58 +52,61 @@ namespace SmartLock
         // Sends log to db
         public bool SendLogs(ArrayList logList)
         {
-            string jsonString = Json.BuildNamedArray(LogHeader, logList);
-            HttpWebRequest request = WebRequest.Create(URL) as HttpWebRequest;
-            byte[] requestByteArray = Encoding.UTF8.GetBytes(jsonString);
+            var jsonString = Json.BuildNamedArray(LogHeader, logList);
+            var request = WebRequest.Create(Url) as HttpWebRequest;
+            var requestByteArray = Encoding.UTF8.GetBytes(jsonString);
 
             try
             {
                 // Send the request
-                request.Method = "POST";
-                request.ContentType = "application/json; charset=utf-8";
-                request.ContentLength = requestByteArray.Length;
-
-                Stream postStream = request.GetRequestStream();
-
-                postStream.Write(requestByteArray, 0, requestByteArray.Length);
-                postStream.Close();
-
-                // Grab the response
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                if (request != null)
                 {
-                    String responseValue = string.Empty;
+                    request.Method = "POST";
+                    request.ContentType = "application/json; charset=utf-8";
+                    request.ContentLength = requestByteArray.Length;
 
-                    // Error
-                    if (response.StatusCode != HttpStatusCode.OK)
-                    {
-                        Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
-                        return false;
-                    }
+                    var postStream = request.GetRequestStream();
+
+                    postStream.Write(requestByteArray, 0, requestByteArray.Length);
+                    postStream.Close();
 
                     // Grab the response
-                    using (Stream responseStream = response.GetResponseStream())
+                    using (var response = request.GetResponse() as HttpWebResponse)
                     {
-                        if (responseStream != null)
+                        var responseValue = string.Empty;
+
+                        if (response != null)
                         {
-                            using (var reader = new StreamReader(responseStream))
+                            // Error
+                            if (response.StatusCode != HttpStatusCode.OK)
                             {
-                                responseValue = reader.ReadToEnd();
+                                Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
+                                return false;
+                            }
+
+                            // Grab the response
+                            using (var responseStream = response.GetResponseStream())
+                            {
+                                if (responseStream != null)
+                                    using (var reader = new StreamReader(responseStream))
+                                    {
+                                        responseValue = reader.ReadToEnd();
+                                    }
                             }
                         }
+
+                        // Print response for debug purposes
+                        Debug.Print("Server response: " + responseValue);
                     }
-
-                    // Print response for debug purposes
-                    Debug.Print("Server response: " + responseValue);
                 }
-
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while sending logs: " + e.ToString());
+                Debug.Print("ERROR: Exception while sending logs: " + e);
                 return false;
             }
 
             return true;
         }
     }
-} 
+}

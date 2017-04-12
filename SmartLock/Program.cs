@@ -65,7 +65,7 @@ namespace SmartLock
             if (!scanWindow.IsShowing())
             {
                 // Check authorization
-                var authorized = dataHelper.CheckCardID(uid);
+                var authorized = dataHelper.CheckCardId(uid);
 
                 // Show access window
                 accessWindow.Show(authorized);
@@ -85,21 +85,21 @@ namespace SmartLock
                 }
 
                 Debug.Print(logText);
-                var accessLog = new Log(Log.TYPE_ACCESS, uid, logText, DateTime.Now.ToString());
+                var accessLog = new Log(Log.TypeAccess, uid, logText, DateTime.Now.ToString());
                 dataHelper.AddLog(accessLog); //add log to log list
             }
             else
             {
                 // Log new cardID
                 var newCardIdLog = new Log(
-                    Log.TYPE_ACCESS,
+                    Log.TypeAccess,
                     pendingPin,
                     uid,
                     "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".",
                     DateTime.Now.ToString());
 
                 // Update CardID in userList
-                dataHelper.AddCardID(pendingPin, uid);
+                dataHelper.AddCardId(pendingPin, uid);
 
                 dataHelper.AddLog(newCardIdLog);
 
@@ -119,7 +119,7 @@ namespace SmartLock
         {
             // Check authorization
             var authorized = dataHelper.CheckPin(pin);
-            var nullCardId = dataHelper.PinHasNullCardID(pin);
+            var nullCardId = dataHelper.PinHasNullCardId(pin);
 
             // Log the event
             string logText;
@@ -137,7 +137,7 @@ namespace SmartLock
 
 
             Debug.Print(logText);
-            var accessLog = new Log(Log.TYPE_ACCESS, pin, logText, DateTime.Now.ToString());
+            var accessLog = new Log(Log.TypeAccess, pin, logText, DateTime.Now.ToString());
             dataHelper.AddLog(accessLog); //add log to log list
 
             if (nullCardId)
@@ -183,7 +183,7 @@ namespace SmartLock
         private void DataSourceChanged(int dataSource)
         {
             pinWindow.SetDataSource(dataSource);
-            if (dataSource == DataHelper.DATA_SOURCE_ERROR)
+            if (dataSource == DataHelper.DataSourceError)
             {
                 var dataSourceAlert = new AlertWindow(WindowAlertId, WindowAlertPeriod);
                 dataSourceAlert.SetText(

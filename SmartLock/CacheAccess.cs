@@ -1,20 +1,16 @@
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
-
-using Microsoft.SPOT;
-
 using Gadgeteer.Modules.GHIElectronics;
+using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    class CacheAccess
+    internal class CacheAccess
     {
-        private const String USER_CACHE_FILE = "users";
-        private const String LOG_CACHE_FILE = "log";       
+        private const string UserCacheFile = "users";
+        private const string LogCacheFile = "log";
 
-        private SDCard sdCard;
+        private readonly SDCard sdCard;
 
         public CacheAccess(SDCard sdCard)
         {
@@ -24,45 +20,41 @@ namespace SmartLock
         // Data Management
         public bool LoadUsers(ArrayList destination)
         {
-            return Load(destination, USER_CACHE_FILE);
+            return Load(destination, UserCacheFile);
         }
 
         public bool LoadLogs(ArrayList destination)
         {
-            return Load(destination, LOG_CACHE_FILE);
+            return Load(destination, LogCacheFile);
         }
 
         public bool StoreUsers(ArrayList userList)
         {
-            return Store(userList, USER_CACHE_FILE);
+            return Store(userList, UserCacheFile);
         }
 
         public bool StoreLogs(ArrayList logList)
         {
-            return Store(logList, LOG_CACHE_FILE);
+            return Store(logList, LogCacheFile);
         }
 
         // Inner methods
-        private bool Load(ArrayList list, String file)
+        private bool Load(ArrayList list, string file)
         {
             // Init SD card
-            if (!Init(file))
-            {
+            if (!Init())
                 return false;
-            }
 
             // Check if file exist
             if (!FileExists(file))
-            {
                 return false;
-            }
 
             byte[] data;
 
 
             try
             {
-                FileStream f = sdCard.StorageDevice.OpenRead(file);
+                var f = sdCard.StorageDevice.OpenRead(file);
 
                 // If the file is empty do not parse
                 if (f.Length == 0)
@@ -77,18 +69,18 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while reading \"" + file + "\": " + e.ToString());
+                Debug.Print("ERROR: Exception while reading \"" + file + "\": " + e);
                 return false;
             }
 
             try
             {
-                ArrayList temp = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
+                var temp = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
                 Utils.ArrayListCopy(temp, list);
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while deserializing \"" + file + "\": " + e.ToString());
+                Debug.Print("ERROR: Exception while deserializing \"" + file + "\": " + e);
                 return false;
             }
 
@@ -97,13 +89,11 @@ namespace SmartLock
             return true;
         }
 
-        private bool Store(ArrayList list, String file)
+        private bool Store(ArrayList list, string file)
         {
             // Init SD card
-            if (!Init(file))
-            {
+            if (!Init())
                 return false;
-            }
 
             FileExists(file);
 
@@ -123,20 +113,20 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while serializing \"" + file + "\": " + e.ToString());
+                Debug.Print("ERROR: Exception while serializing \"" + file + "\": " + e);
                 return false;
             }
 
             try
             {
                 // Write data
-                FileStream f = sdCard.StorageDevice.OpenWrite(file);
+                var f = sdCard.StorageDevice.OpenWrite(file);
                 f.Write(data, 0, data.Length);
                 f.Close();
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while writing \"" + file + "\": " + e.ToString());
+                Debug.Print("ERROR: Exception while writing \"" + file + "\": " + e);
                 return false;
             }
 
@@ -145,8 +135,8 @@ namespace SmartLock
             return true;
         }
 
-        private bool Init(String file){
-
+        private bool Init()
+        {
             if (!sdCard.IsCardInserted)
             {
                 Debug.Print("ERROR: SD slot is empty!");
@@ -166,26 +156,22 @@ namespace SmartLock
             return true;
         }
 
-        bool FileExists(String file)
+        private bool FileExists(string file)
         {
             // Check if file exists
-            string root = sdCard.StorageDevice.RootDirectory;
-            string[] foundFiles = sdCard.StorageDevice.ListFiles(root);
+            var root = sdCard.StorageDevice.RootDirectory;
+            var foundFiles = sdCard.StorageDevice.ListFiles(root);
 
-            bool exist = false;
-            foreach (string aFile in foundFiles)
-            {
-                if (String.Compare(file, aFile) == 0)
+            var exist = false;
+            foreach (var aFile in foundFiles)
+                if (string.Compare(file, aFile) == 0)
                 {
                     exist = true;
                     break;
                 }
-            }
 
             if (!exist)
-            {
                 Debug.Print("File \"" + file + "\" not found!");
-            }
 
             return exist;
         }
