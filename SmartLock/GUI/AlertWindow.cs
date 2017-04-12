@@ -1,48 +1,44 @@
-using System;
-
 using GHI.Glide;
-using GHI.Glide.Display;
 using GHI.Glide.UI;
 
 namespace SmartLock.GUI
 {
+    /*
+     * AlertWindow:
+     * TimedWindow with optional multichoice events.
+     */
     public class AlertWindow : TimedWindow
     {
-        private Button positiveButton;
-        private Button negativeButton;
+        private readonly TextBlock alertText;
+        private readonly Button negativeButton;
+        private readonly Button positiveButton;
 
-        private TextBlock alertText;
-
-        public AlertWindow(int period)
-            : base(period)
+        public AlertWindow(int id, int period) : base(id, period)
         {
-            Window window = new Window();
-            window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AlertWindow));
+            Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AlertWindow));
 
             // Load access window elements
-            alertText = (TextBlock) window.GetChildByName("alert_text");
-            positiveButton = (Button) window.GetChildByName("positive_button");
-            negativeButton = (Button)window.GetChildByName("negative_button");
+            alertText = (TextBlock) Window.GetChildByName("alert_text");
+            positiveButton = (Button) Window.GetChildByName("positive_button");
+            negativeButton = (Button) Window.GetChildByName("negative_button");
 
             alertText.Visible = false;
             positiveButton.Visible = false;
             negativeButton.Visible = false;
-
-            SetWindow(window);
         }
 
-        public void SetPositiveButton(String positiveText, OnPress PressedEvent)
+        public void SetPositiveButton(string positiveText, OnPress pressedEvent)
         {
             positiveButton.Visible = true;
             positiveButton.Text = positiveText;
-            positiveButton.PressEvent += PressedEvent;
+            positiveButton.PressEvent += pressedEvent;
         }
 
-        public void SetNegativeButton(String negativeText, OnPress PressedEvent)
+        public void SetNegativeButton(string negativeText, OnPress pressedEvent)
         {
             negativeButton.Visible = true;
             negativeButton.Text = negativeText;
-            negativeButton.PressEvent += PressedEvent;
+            negativeButton.PressEvent += pressedEvent;
         }
 
         public void SetText(string alertTextString)

@@ -15,11 +15,17 @@ namespace SmartLock
 {
     public partial class Program
     {
-        // Constants
+        // Time constants
         private const int WINDOW_ACCESS_PERIOD = 2000;
         private const int WINDOW_ALERT_PERIOD = 10000;
         private const int NFC_SCAN_PERIOD = 1000;
         private const int NFC_SCAN_TIMEOUT = 200;
+
+        // Window ID constants
+        private const int WINDOW_PIN_ID = 0;
+        private const int WINDOW_ACCESS_ID = 1;
+        private const int WINDOW_ALERT_ID = 2;
+        private const int WINDOW_SCAN_ID = 3;
         
         // Main Objects
         private PinWindow pinWindow;
@@ -35,9 +41,9 @@ namespace SmartLock
             Debug.Print("Program started!");          
 
             // Object init
-            pinWindow = new PinWindow();
-            accessWindow = new AccessWindow(WINDOW_ACCESS_PERIOD);
-            scanWindow = new AlertWindow(WINDOW_ALERT_PERIOD);
+            pinWindow = new PinWindow(WINDOW_PIN_ID);
+            accessWindow = new AccessWindow(WINDOW_ACCESS_ID, WINDOW_ACCESS_PERIOD);
+            scanWindow = new AlertWindow(WINDOW_SCAN_ID, WINDOW_ALERT_PERIOD);
             dataHelper = new DataHelper(ethernetJ11D, sdCard);
 
             // Event Setup
@@ -54,8 +60,8 @@ namespace SmartLock
 
             dataHelper.Init();
 
-            WindowManger.MainWindow = pinWindow.Window;
-            WindowManger.VisibilityChanged += PinWindowVisible;
+            WindowManger.MainWindow = pinWindow;
+            WindowManger.WindowChanged += WindowChanged;
             WindowManger.ShowMainWindow();
         }
 
@@ -94,8 +100,6 @@ namespace SmartLock
             }
             else
             {
-                adafruit_PN532.StopScan();
-
                 // Log new cardID
                 Log newCardIDLog = new Log(
                     Log.TYPE_ACCESS, 
@@ -109,7 +113,7 @@ namespace SmartLock
 
                 dataHelper.AddLog(newCardIDLog);
 
-                AlertWindow cardAddedAlert = new AlertWindow(10000);
+                AlertWindow cardAddedAlert = new AlertWindow(WINDOW_ALERT_ID, WINDOW_ALERT_PERIOD);
                 cardAddedAlert.SetText("NFC card added!");
                 cardAddedAlert.SetPositiveButton("Ok", delegate(Object target)
                 {
@@ -152,7 +156,7 @@ namespace SmartLock
             if (nullCardID)
             {
                 // Null CardID detected, prompt the user to set one
-                AlertWindow nullCardIDAlert = new AlertWindow(WINDOW_ALERT_PERIOD);
+                AlertWindow nullCardIDAlert = new AlertWindow(WINDOW_ALERT_ID, WINDOW_ALERT_PERIOD);
                 nullCardIDAlert.SetText("It happears that this user has no related NFC card.\nDo you want to scan it now?");
                 nullCardIDAlert.SetPositiveButton("Yes", delegate(Object target)
                 {
@@ -160,9 +164,6 @@ namespace SmartLock
                     pendingPin = pin;
                     nullCardIDAlert.StopTimer(); // Hacky solution, but prevents graphical glitches
                     scanWindow.Show();
-
-                    // Start NFC scan
-                    adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
                 });
                 nullCardIDAlert.SetNegativeButton("No", delegate(Object target)
                 {
@@ -196,7 +197,7 @@ namespace SmartLock
             pinWindow.SetDataSource(dataSource);
             if (dataSource == DataHelper.DATA_SOURCE_ERROR)
             {
-                AlertWindow dataSourceAlert = new AlertWindow(10000);
+                AlertWindow dataSourceAlert = new AlertWindow(WINDOW_ALERT_ID, WINDOW_ALERT_PERIOD);
                 dataSourceAlert.SetText("Unable to load dataset from cache! The system will remain offline until connection is established.");
                 dataSourceAlert.SetPositiveButton("Ok", delegate(Object target) 
                 {
@@ -211,9 +212,9 @@ namespace SmartLock
          * This event occours when the visibility of pinWindow changes.
          */
 
-        void PinWindowVisible(bool visibility)
+        void WindowChanged(int ID)
         {
-            if (visibility)
+            if (ID == WINDOW_PIN_ID || ID == WINDOW_SCAN_ID)
             {
                 adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
             }

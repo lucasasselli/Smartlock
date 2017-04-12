@@ -1,32 +1,25 @@
-using GHI.Glide.Display;
-using GT = Gadgeteer; 
+using GT = Gadgeteer;
 
 namespace SmartLock.GUI
 {
     /*
-     * Abstract wrapper class to generate and display timed windows.
-     * The window must be created in an overridden constuctor and then set with the "SetWindow" method.
-     * The constructor takes two arguments: "fallbackWindow" is the window to wich the TimedWindow returs after the timer 
-     * has expired and "period" wich is the timer period.
+     * TimedWindow:
+     * ManageableWindow that is shown on screen for a limited amount of time.
      */
-
-    public abstract class TimedWindow
+    public abstract class TimedWindow : ManageableWindow
     {
-        private Window timedWindow;
+        private readonly GT.Timer timerShowWindow;
 
-        // Timers        
-        private GT.Timer timerShowWindow;
-
-        public TimedWindow(int period)
+        protected TimedWindow(int id, int period) : base(id)
         {
             timerShowWindow = new GT.Timer(period);
-            timerShowWindow.Tick += new GT.Timer.TickEventHandler(timerShowWindow_Tick);
+            timerShowWindow.Tick += timerShowWindow_Tick;
         }
 
         // Shows the window for "period" time
-        public void Show()
+        public override void Show()
         {
-            WindowManger.ShowWindow(timedWindow);
+            base.Show();
             timerShowWindow.Start();
         }
 
@@ -47,12 +40,6 @@ namespace SmartLock.GUI
         private void timerShowWindow_Tick(GT.Timer timerAccessWindow)
         {
             Dismiss();
-        }
-
-        // Sets the wrapped window
-        public void SetWindow(Window timedWindow)
-        {
-            this.timedWindow = timedWindow;
         }
 
         // Returns true if the window is currently being displayed

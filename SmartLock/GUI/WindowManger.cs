@@ -3,28 +3,50 @@ using GHI.Glide.Display;
 
 namespace SmartLock.GUI
 {
-    /*
-     * Wrapper class for Glide to allow swapping from/to a "mainWindow" and generating events when its visibility
-     * changes.
+    /* 
+     * WindowManager:
+     * allow to control the on screen window and generate events.
      */
-
     public static class WindowManger
     {
-        public static event VisibilityEventHandler VisibilityChanged;
-        public delegate void VisibilityEventHandler(bool visible);
+        public delegate void WindowEventHandler(int windowId);
 
-        public static Window MainWindow { get; set; }
+        public static ManageableWindow MainWindow { get; set; }
+        public static event WindowEventHandler WindowChanged;
 
+        // Shows the main window
         public static void ShowMainWindow()
         {
-            Glide.MainWindow = MainWindow;
-            VisibilityChanged(true);
+            Glide.MainWindow = MainWindow.Window;
+            if (WindowChanged != null) WindowChanged(MainWindow.Id);
         }
 
-        public static void ShowWindow(Window window)
+        // Shows the manageable window
+        public static void ShowWindow(ManageableWindow manageable)
         {
-            Glide.MainWindow = window;
-            VisibilityChanged(false);
+            Glide.MainWindow = manageable.Window;
+            if (WindowChanged != null) WindowChanged(manageable.Id);
+        }
+    }
+
+    /*
+     * ManageableWindow:
+     * window wrapper to be used with WindowManager. Adds an id to each windows that is passed to the "WindowChanged" event.
+     */
+    public class ManageableWindow
+    {
+        public ManageableWindow(int id)
+        {
+            Id = id;
+        }
+
+        public Window Window { get; protected set; }
+        public int Id { get; private set; }
+
+        // Shows the this window
+        public virtual void Show()
+        {
+            WindowManger.ShowWindow(this);
         }
     }
 }

@@ -1,38 +1,39 @@
-using Microsoft.SPOT;
-
 using GHI.Glide;
-using GHI.Glide.Display;
 using GHI.Glide.UI;
+using Microsoft.SPOT;
 
 namespace SmartLock.GUI
 {
+    /*
+     * AccessWindow:
+     * TimedWindow to show the result of login. 
+     */
     public class AccessWindow : TimedWindow
     {
-        private Image accessImage;
-        private TextBlock accessText;
+        private readonly Image accessImage;
+        private readonly TextBlock accessText;
 
-        public AccessWindow(int period) : base(period)
+        public AccessWindow(int id, int period) : base(id, period)
         {
-            Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
+            Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
 
             // Load access window elements
-            accessImage = (Image) window.GetChildByName("access_imm");
-            accessText = (TextBlock) window.GetChildByName("access_tb");
-
-            SetWindow(window);
+            accessImage = (Image) Window.GetChildByName("access_imm");
+            accessText = (TextBlock) Window.GetChildByName("access_tb");
         }
 
         public void Show(bool mode)
         {
             if (mode)
             {
-
-                accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_ok), Bitmap.BitmapImageType.Bmp);
+                accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_ok),
+                    Bitmap.BitmapImageType.Bmp);
                 accessText.Text = "Access Allowed!";
             }
             else
             {
-                accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_alt), Bitmap.BitmapImageType.Bmp);
+                accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_alt),
+                    Bitmap.BitmapImageType.Bmp);
                 accessText.Text = "Access Denied!";
             }
 

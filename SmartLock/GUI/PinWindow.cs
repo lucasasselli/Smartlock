@@ -1,70 +1,52 @@
-using System;
-using Microsoft.SPOT;
-
 using GHI.Glide;
-using GHI.Glide.Display;
 using GHI.Glide.UI;
+using Microsoft.SPOT;
 
 namespace SmartLock.GUI
 {
-    public class PinWindow
+    public class PinWindow : ManageableWindow
     {
-        // Constants
-        private const int pinLength = 5; // pin max length
-        private const int timerSecondWindowCount = 1500; // 1.5 sec
-
-        // Event handling
-        public event PinEventHandler PinFound;
         public delegate void PinEventHandler(string pin);
+
+        // Constants
+        private const int PinLength = 5; // pin max length
+
+        private readonly Image dataSourceImm;
+
+        // Pin Window element
+        private readonly PasswordBox passwordBox;
 
         // Global variables
         private int numDigits; // Current number of digits inside the pin
+
         private string pin; // String of the pin
 
-        public Window Window { get; private set; }
-
-        // Pin Window element
-        private PasswordBox pb1;
-        private Button bt0;
-        private Button bt1;
-        private Button bt2;
-        private Button bt3;
-        private Button bt4;
-        private Button bt5;
-        private Button bt6;
-        private Button bt7;
-        private Button bt8;
-        private Button bt9;
-        private Button btac;
-        private Button btdel;
-        private Image dataSourceImm;
-
-        public PinWindow()
+        public PinWindow(int id) : base(id)
         {
             // Data Setup
             numDigits = 0;
-            
+
             // Load graphical resources
             Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.PinWindow));
-        
+
             // Initialization
             GlideTouch.Initialize();
 
-            // Load pin window elements
-            bt0 = (Button) Window.GetChildByName("b0");
-            bt1 = (Button) Window.GetChildByName("b1");
-            bt2 = (Button) Window.GetChildByName("b2");
-            bt3 = (Button) Window.GetChildByName("b3");
-            bt4 = (Button) Window.GetChildByName("b4");
-            bt5 = (Button) Window.GetChildByName("b5");
-            bt6 = (Button) Window.GetChildByName("b6");
-            bt7 = (Button) Window.GetChildByName("b7");
-            bt8 = (Button) Window.GetChildByName("b8");
-            bt9 = (Button) Window.GetChildByName("b9");
-            btdel = (Button) Window.GetChildByName("bdel");
-            btac = (Button) Window.GetChildByName("bac");
-            pb1 = (PasswordBox) Window.GetChildByName("p1");
-            dataSourceImm = (Image)Window.GetChildByName("data_source");
+            // Load window elements
+            var bt0 = (Button) Window.GetChildByName("b0");
+            var bt1 = (Button) Window.GetChildByName("b1");
+            var bt2 = (Button) Window.GetChildByName("b2");
+            var bt3 = (Button) Window.GetChildByName("b3");
+            var bt4 = (Button) Window.GetChildByName("b4");
+            var bt5 = (Button) Window.GetChildByName("b5");
+            var bt6 = (Button) Window.GetChildByName("b6");
+            var bt7 = (Button) Window.GetChildByName("b7");
+            var bt8 = (Button) Window.GetChildByName("b8");
+            var bt9 = (Button) Window.GetChildByName("b9");
+            var btdel = (Button) Window.GetChildByName("bdel");
+            var btac = (Button) Window.GetChildByName("bac");
+            passwordBox = (PasswordBox) Window.GetChildByName("p1");
+            dataSourceImm = (Image) Window.GetChildByName("data_source");
 
             bt0.TapEvent += bt0_TapEvent;
             bt1.TapEvent += bt1_TapEvent;
@@ -83,20 +65,26 @@ namespace SmartLock.GUI
             SetDataSource(DataHelper.DATA_SOURCE_UNKNOWN);
         }
 
+        // Event handling
+        public event PinEventHandler PinFound;
+
         public void SetDataSource(int dataSource)
         {
             switch (dataSource)
             {
                 case DataHelper.DATA_SOURCE_CACHE:
-                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_cache), Bitmap.BitmapImageType.Bmp);
+                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_cache),
+                        Bitmap.BitmapImageType.Bmp);
                     break;
 
                 case DataHelper.DATA_SOURCE_REMOTE:
-                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_remote), Bitmap.BitmapImageType.Bmp);
+                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_remote),
+                        Bitmap.BitmapImageType.Bmp);
                     break;
 
                 default:
-                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_error), Bitmap.BitmapImageType.Bmp);
+                    dataSourceImm.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.data_source_error),
+                        Bitmap.BitmapImageType.Bmp);
                     break;
             }
 
@@ -107,96 +95,96 @@ namespace SmartLock.GUI
         private void CheckPin()
         {
             numDigits++;
-            if (numDigits == pinLength) //reached pin length
+            if (numDigits == PinLength) //reached pin length
             {
                 // Calls the PinFound event
-                PinFound(pin);
+                if (PinFound != null) PinFound(pin);
 
                 // Reset interface
                 numDigits = 0;
-                pin = String.Empty; //clear pin
-                pb1.Text = pin;
-                pb1.Invalidate();
+                pin = string.Empty; //clear pin
+                passwordBox.Text = pin;
+                passwordBox.Invalidate();
             }
         }
 
         private void bt0_TapEvent(object sender)
         {
             pin = pin + '0';
-            pb1.Text = pin;
-            pb1.Invalidate(); //update pinbox
+            passwordBox.Text = pin;
+            passwordBox.Invalidate(); //update pinbox
             CheckPin();
         }
 
         private void bt1_TapEvent(object sender)
         {
             pin = pin + '1';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt2_TapEvent(object sender)
         {
             pin = pin + '2';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt3_TapEvent(object sender)
         {
             pin = pin + '3';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt4_TapEvent(object sender)
         {
             pin = pin + '4';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt5_TapEvent(object sender)
         {
             pin = pin + '5';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt6_TapEvent(object sender)
         {
             pin = pin + '6';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt7_TapEvent(object sender)
         {
             pin = pin + '7';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt8_TapEvent(object sender)
         {
             pin = pin + '8';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
         private void bt9_TapEvent(object sender)
         {
             pin = pin + '9';
-            pb1.Text = pin;
-            pb1.Invalidate();
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             CheckPin();
         }
 
@@ -205,19 +193,18 @@ namespace SmartLock.GUI
             if (pin.Length != 0)
             {
                 pin = pin.Substring(0, pin.Length - 1);
-                pb1.Text = pin;
-                pb1.Invalidate();
+                passwordBox.Text = pin;
+                passwordBox.Invalidate();
                 numDigits--;
             }
         }
 
         private void btac_TapEvent(object sender)
         {
-            pin = String.Empty; //clear pin
-            pb1.Text = pin;
-            pb1.Invalidate();
+            pin = string.Empty; //clear pin
+            passwordBox.Text = pin;
+            passwordBox.Invalidate();
             numDigits = 0;
         }
     }
 }
-
