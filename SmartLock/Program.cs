@@ -94,6 +94,8 @@ namespace SmartLock
             }
             else
             {
+                adafruit_PN532.StopScan();
+
                 // Log new cardID
                 Log newCardIDLog = new Log(
                     Log.TYPE_ACCESS, 
@@ -158,6 +160,9 @@ namespace SmartLock
                     pendingPin = pin;
                     nullCardIDAlert.StopTimer(); // Hacky solution, but prevents graphical glitches
                     scanWindow.Show();
+
+                    // Start NFC scan
+                    adafruit_PN532.StartScan(NFC_SCAN_PERIOD, NFC_SCAN_TIMEOUT);
                 });
                 nullCardIDAlert.SetNegativeButton("No", delegate(Object target)
                 {

@@ -92,7 +92,7 @@ namespace SmartLock
                 return false;
             }
 
-            Debug.Print("File \"" + file + "\" successfully loaded into \"" + list.ToString() + "\" object");
+            Debug.Print("File \"" + file + "\" successfully loaded into object");
 
             return true;
         }
@@ -140,7 +140,7 @@ namespace SmartLock
                 return false;
             }
 
-            Debug.Print("Object \"" + list.ToString() + "\" successfully stored into \"" + file + "\" file");
+            Debug.Print("Object successfully stored into \"" + file + "\" file");
 
             return true;
         }
