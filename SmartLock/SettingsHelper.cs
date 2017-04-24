@@ -12,9 +12,10 @@ namespace SmartLock
         public const int ServerPort = 1;
         public const int LockId = 2;
         public const int RequestPeriod = 3;
+        public const int MasterPin = 4;
 
         // Default array
-        private static string[] defaultArray = { "192.168.1.101", "8000", "1", "120000" };
+        private static string[] defaultArray = { "192.168.1.101", "8000", "1", "120000", "0000000000"};
 
         // Setting array
         private static ArrayList settingArray = new ArrayList();

@@ -115,6 +115,30 @@ namespace SmartLock
             return true;
         }
 
+        public static bool Delete(string file)
+        {
+            // Init SD card
+            if (!MountCheck())
+                return false;
+
+            // Check if file exist
+            if (!FileExists(file))
+                return true;
+
+            try
+            {
+                // Write data
+                sdCard.StorageDevice.Delete(file);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("ERROR: Exception while deleting \"" + file + "\": " + e);
+                return false;
+            }
+
+            return true;
+        }
+
         private static bool MountCheck()
         {
             if (!sdCard.IsCardInserted)

@@ -19,6 +19,7 @@ namespace SmartLock
         private const int WindowAccessId = 1;
         private const int WindowAlertId = 2;
         private const int WindowScanId = 3;
+        private const int WindowMaintenanceId = 4;
 
         // Nfc setup
         private string pendingPin;
@@ -30,6 +31,7 @@ namespace SmartLock
         PinWindow pinWindow = new PinWindow(WindowPinId);
         AccessWindow accessWindow = new AccessWindow(WindowAccessId, WindowAccessPeriod);
         AlertWindow scanWindow = new AlertWindow(WindowScanId, WindowAlertPeriod);
+        MaintenanceWindow maintenanceWindow = new MaintenanceWindow(WindowMaintenanceId);
 
         public void ProgramStarted()
         {
@@ -124,6 +126,15 @@ namespace SmartLock
          */
         private void PinFound(string pin)
         {
+            string masterPin = SettingsHelper.Get(SettingsHelper.MasterPin);
+
+            // Check master pin
+            if (String.Compare(masterPin, pin) == 0)
+            {
+                maintenanceWindow.Show();
+                return;
+            }
+            
             // Check authorization
             var authorized = dataHelper.CheckPin(pin);
             var nullCardId = dataHelper.PinHasNullCardId(pin);
