@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.SPOT;
+using GHI.Glide;
 using SmartLock.GUI;
 using GT = Gadgeteer;
 
@@ -49,6 +50,10 @@ namespace SmartLock
 
             dataHelper.Init();
             adafruit_PN532.Init();
+
+
+            // Initialization
+            GlideTouch.Initialize();
 
             WindowManger.MainWindow = pinWindow;
             WindowManger.WindowChanged += WindowChanged;

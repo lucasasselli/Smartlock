@@ -1,4 +1,5 @@
 using GHI.Glide;
+using GHI.Glide.UI;
 using GHI.Glide.Display;
 
 namespace SmartLock.GUI

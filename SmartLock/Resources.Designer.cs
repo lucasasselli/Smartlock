@@ -51,7 +51,7 @@ namespace SmartLock
         {
             AccessWindow = -6304,
             AlertWindow = 135,
-            PinWindow = 29358,
+            InputWindow = 5177,
         }
         [System.SerializableAttribute()]
         internal enum FontResources : short
