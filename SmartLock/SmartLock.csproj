@@ -59,6 +59,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SettingsHelper.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="GUI\AccessWindow.cs" />
     <Compile Include="GUI\AlertWindow.cs" />

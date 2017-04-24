@@ -5,44 +5,25 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    internal class CacheAccess
+    internal static class CacheAccess
     {
-        private const string UserCacheFile = "users";
-        private const string LogCacheFile = "log";
+        private const int mountAttempts = 10;
+        private const int mountAttemptPeriod = 100;
+        public const string UsersCacheFile = "users";
+        public const string LogsCacheFile = "logs";
+        public const string SettingsFile = "settings";
 
-        private readonly SDCard sdCard;
+        private static SDCard sdCard;
 
-        public CacheAccess(SDCard sdCard)
+        public static void Init(SDCard _sdCard)
         {
-            this.sdCard = sdCard;
+            sdCard = _sdCard;
         }
 
-        // Data Management
-        public bool LoadUsers(ArrayList destination)
-        {
-            return Load(destination, UserCacheFile);
-        }
-
-        public bool LoadLogs(ArrayList destination)
-        {
-            return Load(destination, LogCacheFile);
-        }
-
-        public bool StoreUsers(ArrayList userList)
-        {
-            return Store(userList, UserCacheFile);
-        }
-
-        public bool StoreLogs(ArrayList logList)
-        {
-            return Store(logList, LogCacheFile);
-        }
-
-        // Inner methods
-        private bool Load(ArrayList list, string file)
+        public static bool Load(ArrayList list, string file)
         {
             // Init SD card
-            if (!Init())
+            if (!MountCheck())
                 return false;
 
             // Check if file exist
@@ -50,7 +31,6 @@ namespace SmartLock
                 return false;
 
             byte[] data;
-
 
             try
             {
@@ -89,10 +69,10 @@ namespace SmartLock
             return true;
         }
 
-        private bool Store(ArrayList list, string file)
+        public static bool Store(ArrayList list, string file)
         {
             // Init SD card
-            if (!Init())
+            if (!MountCheck())
                 return false;
 
             FileExists(file);
@@ -135,7 +115,7 @@ namespace SmartLock
             return true;
         }
 
-        private bool Init()
+        private static bool MountCheck()
         {
             if (!sdCard.IsCardInserted)
             {
@@ -146,17 +126,22 @@ namespace SmartLock
             if (!sdCard.IsCardMounted)
             {
                 Debug.Print("SD Card appears to be unmounted! Mounting...");
-                if (!sdCard.Mount())
+
+                for (int i = 0; i < mountAttempts; i++)
                 {
-                    Debug.Print("ERROR: Mounting failed!");
-                    return false;
+                    if (sdCard.IsCardMounted) return true;
+                    if (sdCard.Mount()) return true;
+                    System.Threading.Thread.Sleep(mountAttemptPeriod);
                 }
+
+                Debug.Print("ERROR: Mounting failed!");
+                return false;
             }
 
             return true;
         }
 
-        private bool FileExists(string file)
+        private static bool FileExists(string file)
         {
             // Check if file exists
             var root = sdCard.StorageDevice.RootDirectory;

@@ -12,17 +12,14 @@ namespace SmartLock
     public class DatabaseAccess
     {
         // Request + JSON stuff
-        private const string ServerIp = "192.168.1.101";
-        private const string ServerPort = "8000";
-        private const string GadgeteerId = "1";
-        private const string Url = "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/data/?id=" +GadgeteerId;
         private const string UserHeader = "AllowedUsers";
         private const string LogHeader = "Log";
 
         // Loads userlist from db
         public bool RequestUsers(ArrayList userList)
         {
-            var request = WebRequest.Create(Url) as HttpWebRequest;
+            string url = buildUrlFromSettings();
+            var request = WebRequest.Create(url) as HttpWebRequest;
             try
             {
                 if (request != null)
@@ -53,7 +50,8 @@ namespace SmartLock
         public bool SendLogs(ArrayList logList)
         {
             var jsonString = Json.BuildNamedArray(LogHeader, logList);
-            var request = WebRequest.Create(Url) as HttpWebRequest;
+            string url = buildUrlFromSettings();
+            var request = WebRequest.Create(url) as HttpWebRequest;
             var requestByteArray = Encoding.UTF8.GetBytes(jsonString);
 
             try
@@ -107,6 +105,14 @@ namespace SmartLock
             }
 
             return true;
+        }
+
+        private string buildUrlFromSettings()
+        {
+            string ServerIp = SettingsHelper.Get(SettingsHelper.ServerIp);
+            string ServerPort = SettingsHelper.Get(SettingsHelper.ServerPort);
+            string LockId = SettingsHelper.Get(SettingsHelper.LockId);
+            return "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/data/?id=" + LockId;
         }
     }
 }

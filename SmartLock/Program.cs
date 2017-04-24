@@ -25,19 +25,21 @@ namespace SmartLock
 
         // Main Objects
         private DataHelper dataHelper;
-        private AccessWindow accessWindow;
-        private PinWindow pinWindow;
-        private AlertWindow scanWindow;
+
+        // Windows
+        PinWindow pinWindow = new PinWindow(WindowPinId);
+        AccessWindow accessWindow = new AccessWindow(WindowAccessId, WindowAccessPeriod);
+        AlertWindow scanWindow = new AlertWindow(WindowScanId, WindowAlertPeriod);
 
         public void ProgramStarted()
         {
             Debug.Print("Program started!");
 
-            // Object init
-            pinWindow = new PinWindow(WindowPinId);
-            accessWindow = new AccessWindow(WindowAccessId, WindowAccessPeriod);
-            scanWindow = new AlertWindow(WindowScanId, WindowAlertPeriod);
-            dataHelper = new DataHelper(ethernetJ11D, sdCard);
+            // Static init
+            CacheAccess.Init(sdCard);
+            SettingsHelper.Init();
+
+            dataHelper = new DataHelper(ethernetJ11D);
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
@@ -52,7 +54,7 @@ namespace SmartLock
             adafruit_PN532.Init();
 
 
-            // Initialization
+            // Windows and window manager
             GlideTouch.Initialize();
 
             WindowManger.MainWindow = pinWindow;

@@ -13,5 +13,14 @@ namespace SmartLock
                 to.Add(elem);
             }
         }
+
+        public static void ArrayToList(object[] array, ArrayList arraylist)
+        {
+            arraylist.Clear();
+            foreach (object obj in array)
+            {
+                arraylist.Add(obj);
+            }
+        }
     }
 }

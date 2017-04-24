@@ -21,7 +21,6 @@ namespace SmartLock
         public const int DataSourceRemote = 3;
 
         // Wrapped classes
-        private readonly CacheAccess cacheAccess;
         private readonly DatabaseAccess databaseAccess;
 
         // Ethernet object
@@ -42,10 +41,8 @@ namespace SmartLock
 
         private int dataSource;
 
-        public DataHelper(EthernetJ11D ethernetJ11D, SDCard sdCard)
+        public DataHelper(EthernetJ11D ethernetJ11D)
         {
-            // Create wrapped objects
-            cacheAccess = new CacheAccess(sdCard);
             databaseAccess = new DatabaseAccess();
 
             threadWaitForStop = new ManualResetEvent(false);
@@ -66,7 +63,7 @@ namespace SmartLock
         public void Init()
         {
             // Load users from cache
-            if (cacheAccess.LoadUsers(tempUserList))
+            if (CacheAccess.Load(tempUserList, CacheAccess.UsersCacheFile))
             {
                 Debug.Print(tempUserList.Count + " users loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
@@ -81,7 +78,7 @@ namespace SmartLock
             }
 
             // Load logs from cache if any
-            if (cacheAccess.LoadLogs(tempLogList))
+            if (CacheAccess.Load(tempLogList, CacheAccess.LogsCacheFile))
             {
                 Debug.Print(tempLogList.Count + " logs loaded from cache!");
                 Utils.ArrayListCopy(tempLogList, logList);
@@ -132,7 +129,7 @@ namespace SmartLock
                 }
 
             // Update cache copy
-            cacheAccess.StoreUsers(userList);
+            CacheAccess.Store(userList, CacheAccess.UsersCacheFile);
         }
 
         public void AddLog(Log log)
@@ -140,7 +137,7 @@ namespace SmartLock
             logList.Add(log);
 
             // Update cache copy
-            cacheAccess.StoreLogs(logList);
+            CacheAccess.Store(logList, CacheAccess.LogsCacheFile);
         }
 
         // Network is online event
@@ -194,7 +191,7 @@ namespace SmartLock
                         Utils.ArrayListCopy(tempUserList, userList);
 
                         // Store cache copy
-                        cacheAccess.StoreUsers(userList);
+                        CacheAccess.Store(userList, CacheAccess.UsersCacheFile);
 
                         // Data source is now remote
                         ChangeDataSource(DataSourceRemote);
@@ -222,7 +219,7 @@ namespace SmartLock
 
                             // Log list sent to server successfully: delete loglist
                             logList.Clear();
-                            cacheAccess.StoreLogs(logList);
+                            CacheAccess.Store(logList, CacheAccess.LogsCacheFile);
                         }
                         else
                         {
