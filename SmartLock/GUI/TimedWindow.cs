@@ -10,7 +10,7 @@ namespace SmartLock.GUI
     {
         private readonly GT.Timer timerShowWindow;
 
-        protected TimedWindow(int id, int period) : base(id)
+        protected TimedWindow(int period) : base()
         {
             timerShowWindow = new GT.Timer(period);
             timerShowWindow.Tick += timerShowWindow_Tick;
@@ -24,9 +24,9 @@ namespace SmartLock.GUI
         }
 
         // Dismisses the window before "period" has expired
-        public void Dismiss()
+        public override void Dismiss()
         {
-            WindowManger.ShowMainWindow();
+            base.Dismiss();
             timerShowWindow.Stop();
         }
 

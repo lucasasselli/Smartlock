@@ -147,15 +147,15 @@
     &lt;Button Name="b7" X="3" Y="144" Width="46" Height="46" Alpha="255" Text="7" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="b8" X="50" Y="144" Width="46" Height="46" Alpha="255" Text="8" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="b9" X="97" Y="144" Width="46" Height="46" Alpha="255" Text="9" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;PasswordBox Name="p1" X="3" Y="3" Width="140" Height="46" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
+    &lt;TextBox Name="textbox" X="3" Y="3" Width="140" Height="46" Alpha="255" Text="" TextAlign="Left" Font="4" FontColor="000000"/&gt;
     &lt;Button Name="bdel" X="3" Y="191" Width="46" Height="46" Alpha="255" Text="DEL" Font="6" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="b0" X="50" Y="191" Width="46" Height="46" Alpha="255" Text="0" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Button Name="bac" X="97" Y="191" Width="46" Height="46" Alpha="255" Text="AC" Font="6" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
     &lt;Image Name="icon" X="285" Y="203" Width="32" Height="32" Alpha="255"/&gt;
     &lt;Button Name="benter" X="143" Y="97" Width="93" Height="140" Alpha="255" Text="ENTER" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;TextBlock Name="text" X="146" Y="10" Width="171" Height="32" Alpha="255" Text="" TextAlign="Center" TextVerticalAlign="Center" Font="2" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
-    &lt;Button Name="ba1" X="143" Y="50" Width="46" Height="46" Alpha="255" Text="A1" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
-    &lt;Button Name="ba2" X="190" Y="50" Width="46" Height="46" Alpha="255" Text="A2" Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;TextBlock Name="text" X="146" Y="10" Width="171" Height="32" Alpha="255" Text="TextBlock" TextAlign="Center" TextVerticalAlign="Center" Font="2" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;Button Name="bdot" X="143" Y="50" Width="46" Height="46" Alpha="255" Text="." Font="7" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
+    &lt;Button Name="bback" X="190" Y="50" Width="46" Height="46" Alpha="255" Text="Back" Font="5" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>

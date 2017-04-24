@@ -8,7 +8,7 @@ namespace SmartLock.GUI
     {
         public delegate void PinEventHandler(string pin);
 
-        public PinWindow(int id) : base(id, false)
+        public PinWindow() : base(false, false)
         {
             SetDataSource(DataHelper.DataSourceUnknown);
         }
@@ -34,10 +34,10 @@ namespace SmartLock.GUI
             }
         }
 
-        public override void benter_TapEvent(object sender)
+        protected override void benter_TapEvent(object sender)
         {
-            if (PinFound != null) PinFound(Pin);
-            ClearPinField();
+            if (PinFound != null) PinFound(Input);
+            Clear();
         }
     }
 }

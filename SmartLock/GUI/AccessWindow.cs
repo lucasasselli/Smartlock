@@ -13,7 +13,7 @@ namespace SmartLock.GUI
         private readonly Image accessImage;
         private readonly TextBlock accessText;
 
-        public AccessWindow(int id, int period) : base(id, period)
+        public AccessWindow(int period) : base(period)
         {
             Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AccessWindow));
 

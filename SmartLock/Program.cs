@@ -16,10 +16,7 @@ namespace SmartLock
 
         // Window ID constants
         private const int WindowPinId = 0;
-        private const int WindowAccessId = 1;
-        private const int WindowAlertId = 2;
-        private const int WindowScanId = 3;
-        private const int WindowMaintenanceId = 4;
+        private const int WindowScanId = 1;
 
         // Nfc setup
         private string pendingPin;
@@ -28,10 +25,10 @@ namespace SmartLock
         private DataHelper dataHelper;
 
         // Windows
-        PinWindow pinWindow = new PinWindow(WindowPinId);
-        AccessWindow accessWindow = new AccessWindow(WindowAccessId, WindowAccessPeriod);
-        AlertWindow scanWindow = new AlertWindow(WindowScanId, WindowAlertPeriod);
-        MaintenanceWindow maintenanceWindow = new MaintenanceWindow(WindowMaintenanceId);
+        PinWindow pinWindow = new PinWindow();
+        AccessWindow accessWindow = new AccessWindow(WindowAccessPeriod);
+        AlertWindow scanWindow = new AlertWindow(WindowAlertPeriod);
+        MaintenanceWindow maintenanceWindow = new MaintenanceWindow();
 
         public void ProgramStarted()
         {
@@ -52,16 +49,18 @@ namespace SmartLock
             scanWindow.SetText("Please scan your NFC card now...");
             scanWindow.SetNegativeButton("Cancel", delegate { scanWindow.Dismiss(); });
 
-            dataHelper.Init();
-            adafruit_PN532.Init();
-
-
             // Windows and window manager
             GlideTouch.Initialize();
 
+            pinWindow.Id = WindowPinId;
+            scanWindow.Id = WindowScanId;
+
             WindowManger.MainWindow = pinWindow;
             WindowManger.WindowChanged += WindowChanged;
-            WindowManger.ShowMainWindow();
+            WindowManger.Show(pinWindow);
+
+            dataHelper.Init();
+            adafruit_PN532.Init();
         }
 
         /*
@@ -112,7 +111,7 @@ namespace SmartLock
 
                 dataHelper.AddLog(newCardIdLog);
 
-                var cardAddedAlert = new AlertWindow(WindowAlertId, WindowAlertPeriod);
+                var cardAddedAlert = new AlertWindow(WindowAlertPeriod);
                 cardAddedAlert.SetText("NFC card added!");
                 cardAddedAlert.SetPositiveButton("Ok", delegate { cardAddedAlert.Dismiss(); });
                 cardAddedAlert.Show();
@@ -161,7 +160,7 @@ namespace SmartLock
             if (nullCardId)
             {
                 // Null CardID detected, prompt the user to set one
-                var nullCardIdAlert = new AlertWindow(WindowAlertId, WindowAlertPeriod);
+                var nullCardIdAlert = new AlertWindow(WindowAlertPeriod);
                 nullCardIdAlert.SetText(
                     "It happears that this user has no related NFC card.\nDo you want to scan it now?");
                 nullCardIdAlert.SetPositiveButton("Yes", delegate
@@ -203,7 +202,7 @@ namespace SmartLock
             pinWindow.SetDataSource(dataSource);
             if (dataSource == DataHelper.DataSourceError)
             {
-                var dataSourceAlert = new AlertWindow(WindowAlertId, WindowAlertPeriod);
+                var dataSourceAlert = new AlertWindow(WindowAlertPeriod);
                 dataSourceAlert.SetText(
                     "Unable to load dataset from cache! The system will remain offline until connection is established.");
                 dataSourceAlert.SetPositiveButton("Ok", delegate { dataSourceAlert.Dismiss(); });

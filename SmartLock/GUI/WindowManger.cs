@@ -1,3 +1,5 @@
+using Microsoft.SPOT;
+using System.Collections;
 using GHI.Glide;
 using GHI.Glide.UI;
 using GHI.Glide.Display;
@@ -10,23 +12,51 @@ namespace SmartLock.GUI
      */
     public static class WindowManger
     {
-        public delegate void WindowEventHandler(int windowId);
 
+        public delegate void WindowEventHandler(int windowId);
         public static ManageableWindow MainWindow { get; set; }
         public static event WindowEventHandler WindowChanged;
 
-        // Shows the main window
-        public static void ShowMainWindow()
+        private static ArrayList windowStack = new ArrayList();
+
+        public static void Show(ManageableWindow manageable)
         {
-            Glide.MainWindow = MainWindow.Window;
-            if (WindowChanged != null) WindowChanged(MainWindow.Id);
+            windowStack.Add(manageable);
+            Glide.MainWindow = manageable.Window;
+            notifyChanged(MainWindow);
         }
 
-        // Shows the manageable window
-        public static void ShowWindow(ManageableWindow manageable)
+        public static void Back()
         {
-            Glide.MainWindow = manageable.Window;
-            if (WindowChanged != null) WindowChanged(manageable.Id);
+            int lastWindow = windowStack.Count-1;
+            if (lastWindow < 0)
+            {
+                // Error popping empty window stack
+                Debug.Print("ERROR: Window stack is empty!");
+            }
+            else
+            {
+                // Remove last window from the stack
+                windowStack.RemoveAt(lastWindow);
+
+                if (lastWindow == 0)
+                {
+                    Glide.MainWindow = MainWindow.Window;
+                    notifyChanged(MainWindow);
+                }
+                else
+                {
+                    // Show previous window
+                    ManageableWindow manageable = windowStack[lastWindow - 1] as ManageableWindow;
+                    Glide.MainWindow = manageable.Window;
+                    notifyChanged(manageable);
+                }
+            }
+        }
+
+        private static void notifyChanged(ManageableWindow manageable)
+        {
+            if (WindowChanged != null && manageable.Id != -1) WindowChanged(manageable.Id);
         }
     }
 
@@ -36,18 +66,25 @@ namespace SmartLock.GUI
      */
     public class ManageableWindow
     {
-        public ManageableWindow(int id)
+        private const int defaultId = -1;
+
+        public ManageableWindow()
         {
-            Id = id;
+            Id = defaultId;
         }
 
         public Window Window { get; protected set; }
-        public int Id { get; private set; }
+        public int Id { get; set; }
 
         // Shows the this window
         public virtual void Show()
         {
-            WindowManger.ShowWindow(this);
+            WindowManger.Show(this);
+        }
+
+        public virtual void Dismiss()
+        {
+            WindowManger.Back();
         }
     }
 }

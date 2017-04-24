@@ -13,7 +13,7 @@ namespace SmartLock.GUI
         private readonly Button negativeButton;
         private readonly Button positiveButton;
 
-        public AlertWindow(int id, int period) : base(id, period)
+        public AlertWindow(int period) : base(period)
         {
             Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.AlertWindow));
 

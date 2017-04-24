@@ -7,12 +7,12 @@ namespace SmartLock.GUI
     public class MaintenanceWindow : ManageableWindow
     {
         // Time constants
-        private const int WindowAccessPeriod = 2000;
         private const int WindowAlertPeriod = 10000;
-
         private const int WindowAlertId = 0;
 
-        public MaintenanceWindow(int id): base(id)
+        // TODO Create only one instance of setting Window
+        
+        public MaintenanceWindow(): base()
         {
             Window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.MaintenanceWindow));
 
@@ -35,27 +35,39 @@ namespace SmartLock.GUI
         void bback_TapEvent(object sender)
         {
             // Back to main window
-            WindowManger.ShowMainWindow();
+            WindowManger.Back();
         }
 
         void bip_TapEvent(object sender)
         {
             // Change server ip
+            var settingWindow = new SettingWindow(SettingsHelper.ServerIp, true);
+            settingWindow.SetText("Insert server ip");
+            settingWindow.Show();
         }
 
         void bport_TapEvent(object sender)
         {
             // Change server port
+            var settingWindow = new SettingWindow(SettingsHelper.ServerPort, false);
+            settingWindow.SetText("Insert server port");
+            settingWindow.Show();
         }
 
         void blockid_TapEvent(object sender)
         {
             // Change lock id
+            var settingWindow = new SettingWindow(SettingsHelper.LockId, false);
+            settingWindow.SetText("Insert lock id");
+            settingWindow.Show();
         }
 
         void bmaster_TapEvent(object sender)
         {
-            // Change master ip
+            // Change master pin
+            var settingWindow = new SettingWindow(SettingsHelper.MasterPin, false);
+            settingWindow.SetText("Insert master pin");
+            settingWindow.Show();
         }
 
         void bclear_TapEvent(object sender)
@@ -64,7 +76,7 @@ namespace SmartLock.GUI
             if (clearCache())
             {
                 // Cache cleared successfully
-                var cacheSuccessAlert = new AlertWindow(WindowAlertId, WindowAlertPeriod);
+                var cacheSuccessAlert = new AlertWindow(WindowAlertPeriod);
                 cacheSuccessAlert.SetText("Cache cleared!");
                 cacheSuccessAlert.SetPositiveButton("Ok", delegate { cacheSuccessAlert.Dismiss(); });
                 cacheSuccessAlert.Show();

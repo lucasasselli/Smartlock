@@ -44,6 +44,7 @@
     <Compile Include="GUI\MaintenanceWindow.cs" />
     <Compile Include="GUI\PinWindow.cs" />
     <Compile Include="DatabaseAccess.cs" />
+    <Compile Include="GUI\SettingWindow.cs" />
     <Compile Include="GUI\WindowManger.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="Program.generated.cs">
