@@ -23,7 +23,7 @@ namespace SmartLock.GUI
         {
             windowStack.Add(manageable);
             Glide.MainWindow = manageable.Window;
-            notifyChanged(MainWindow);
+            notifyChanged(manageable);
         }
 
         public static void Back()
@@ -56,7 +56,7 @@ namespace SmartLock.GUI
 
         private static void notifyChanged(ManageableWindow manageable)
         {
-            if (WindowChanged != null && manageable.Id != -1) WindowChanged(manageable.Id);
+            if (WindowChanged != null) WindowChanged(manageable.Id);
         }
     }
 

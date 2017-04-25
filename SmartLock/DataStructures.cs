@@ -23,30 +23,6 @@ namespace SmartLock
         public const int TypeInfo = 2;
         public const int TypeError = 4;
 
-        public Log(int type, string pin, string cardId, string text, string dateTime) 
-        {
-            Type = type;
-            Pin = pin;
-            CardID = cardId;
-            Text = text;
-            DateTime = dateTime;
-        }
-
-        public Log(int type, string text, string dateTime)
-        {
-            Type = type;
-            Text = text;
-            DateTime = dateTime;
-        }
-
-        public Log(int type, string pin, string text, string dateTime)
-        {
-            Type = type;
-            Pin = pin;
-            Text = text;
-            DateTime = dateTime;
-        }
-
         public Log(int type, string pin, string cardId, string text)
         {
             Type = type;

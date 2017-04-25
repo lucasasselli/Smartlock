@@ -93,7 +93,7 @@ namespace SmartLock
                 }
 
                 Debug.Print(logText);
-                var accessLog = new Log(Log.TypeAccess, uid, logText, DateTime.Now.ToString());
+                var accessLog = new Log(Log.TypeAccess, uid, logText);
                 dataHelper.AddLog(accessLog); //add log to log list
             }
             else
@@ -103,8 +103,7 @@ namespace SmartLock
                     Log.TypeAccess,
                     pendingPin,
                     uid,
-                    "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".",
-                    DateTime.Now.ToString());
+                    "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".");
 
                 // Update CardID in userList
                 dataHelper.AddCardId(pendingPin, uid);
@@ -167,7 +166,7 @@ namespace SmartLock
                 {
                     // User wants to add a new NFC card
                     pendingPin = pin;
-                    nullCardIdAlert.StopTimer(); // Hacky solution, but prevents graphical glitches
+                    nullCardIdAlert.Dismiss();
                     scanWindow.Show();
                 });
                 nullCardIdAlert.SetNegativeButton("No", delegate
