@@ -41,7 +41,7 @@ namespace SmartLock.GUI
         void bip_TapEvent(object sender)
         {
             // Change server ip
-            var settingWindow = new SettingWindow(SettingsHelper.ServerIp, true);
+            var settingWindow = new SettingWindow(SettingsManager.ServerIp, true);
             settingWindow.SetText("Insert server ip");
             settingWindow.Show();
         }
@@ -49,7 +49,7 @@ namespace SmartLock.GUI
         void bport_TapEvent(object sender)
         {
             // Change server port
-            var settingWindow = new SettingWindow(SettingsHelper.ServerPort, false);
+            var settingWindow = new SettingWindow(SettingsManager.ServerPort, false);
             settingWindow.SetText("Insert server port");
             settingWindow.Show();
         }
@@ -57,7 +57,7 @@ namespace SmartLock.GUI
         void blockid_TapEvent(object sender)
         {
             // Change lock id
-            var settingWindow = new SettingWindow(SettingsHelper.LockId, false);
+            var settingWindow = new SettingWindow(SettingsManager.LockId, false);
             settingWindow.SetText("Insert lock id");
             settingWindow.Show();
         }
@@ -65,7 +65,7 @@ namespace SmartLock.GUI
         void bmaster_TapEvent(object sender)
         {
             // Change master pin
-            var settingWindow = new SettingWindow(SettingsHelper.MasterPin, false);
+            var settingWindow = new SettingWindow(SettingsManager.MasterPin, false);
             settingWindow.SetText("Insert master pin");
             settingWindow.Show();
         }
@@ -89,8 +89,8 @@ namespace SmartLock.GUI
 
         private bool clearCache()
         {
-            if (!CacheAccess.Delete(CacheAccess.UsersCacheFile)) return false;
-            if (!CacheAccess.Delete(CacheAccess.LogsCacheFile)) return false;
+            if (!CacheManager.Delete(CacheManager.UsersCacheFile)) return false;
+            if (!CacheManager.Delete(CacheManager.LogsCacheFile)) return false;
 
             return true;
         }

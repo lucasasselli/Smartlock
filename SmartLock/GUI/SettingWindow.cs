@@ -13,13 +13,13 @@ namespace SmartLock.GUI
             : base(hasDotButton, true)
         {
             this.id = id;
-            string currentValue = SettingsHelper.Get(id);
+            string currentValue = SettingsManager.Get(id);
             SetInput(currentValue);
         }
 
         protected override void benter_TapEvent(object sender)
         {
-            SettingsHelper.Set(id, Input);
+            SettingsManager.Set(id, Input);
             Dismiss();
         }
     }

@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Threading;
 using Gadgeteer.Modules.GHIElectronics;
 using Microsoft.SPOT;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
+using GHI.Processor;
 
 namespace SmartLock
 {
@@ -21,7 +23,7 @@ namespace SmartLock
         public const int DataSourceRemote = 3;
 
         // Wrapped classes
-        private readonly DatabaseAccess databaseAccess;
+        private readonly ServerManager serverManager;
 
         // Ethernet object
         private readonly EthernetJ11D ethernetJ11D;
@@ -43,7 +45,7 @@ namespace SmartLock
 
         public DataHelper(EthernetJ11D ethernetJ11D)
         {
-            databaseAccess = new DatabaseAccess();
+            serverManager = new ServerManager();
 
             threadWaitForStop = new ManualResetEvent(false);
 
@@ -63,7 +65,7 @@ namespace SmartLock
         public void Init()
         {
             // Load users from cache
-            if (CacheAccess.Load(tempUserList, CacheAccess.UsersCacheFile))
+            if (CacheManager.Load(tempUserList, CacheManager.UsersCacheFile))
             {
                 Debug.Print(tempUserList.Count + " users loaded from cache!");
                 Utils.ArrayListCopy(tempUserList, userList);
@@ -78,7 +80,7 @@ namespace SmartLock
             }
 
             // Load logs from cache if any
-            if (CacheAccess.Load(tempLogList, CacheAccess.LogsCacheFile))
+            if (CacheManager.Load(tempLogList, CacheManager.LogsCacheFile))
             {
                 Debug.Print(tempLogList.Count + " logs loaded from cache!");
                 Utils.ArrayListCopy(tempLogList, logList);
@@ -129,7 +131,7 @@ namespace SmartLock
                 }
 
             // Update cache copy
-            CacheAccess.Store(userList, CacheAccess.UsersCacheFile);
+            CacheManager.Store(userList, CacheManager.UsersCacheFile);
         }
 
         public void AddLog(Log log)
@@ -137,7 +139,7 @@ namespace SmartLock
             logList.Add(log);
 
             // Update cache copy
-            CacheAccess.Store(logList, CacheAccess.LogsCacheFile);
+            CacheManager.Store(logList, CacheManager.LogsCacheFile);
         }
 
         // Network is online event
@@ -179,19 +181,36 @@ namespace SmartLock
                 {
                     Debug.Print("Beginning server polling routine...");
 
+                    // Request current time
+                    DateTime rtcDt = RealTimeClock.GetDateTime();
+                    DateTime serverDt = serverManager.RequestTime();
+
+                    if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
+                    {
+                        if (DateTime.Compare(serverDt, rtcDt) != 0)
+                        {
+                            // Found time mismatch
+                            Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                            Debug.Print("Setting RTC...");
+                            RealTimeClock.SetDateTime(serverDt);
+
+                            Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                        }
+                    }
+                    
                     // Clean temporary list
                     tempUserList.Clear();
 
                     Debug.Print("Requesting user list to server...");
 
-                    if (databaseAccess.RequestUsers(tempUserList))
+                    if (serverManager.RequestUsers(tempUserList))
                     {
                         // Copy content to main list
                         userList.Clear();
                         Utils.ArrayListCopy(tempUserList, userList);
 
                         // Store cache copy
-                        CacheAccess.Store(userList, CacheAccess.UsersCacheFile);
+                        CacheManager.Store(userList, CacheManager.UsersCacheFile);
 
                         // Data source is now remote
                         ChangeDataSource(DataSourceRemote);
@@ -213,13 +232,13 @@ namespace SmartLock
                     {
                         Debug.Print(logList.Count + " stored logs must be sent to server!");
                         // Send accumulated logs
-                        if (databaseAccess.SendLogs(logList))
+                        if (serverManager.SendLogs(logList))
                         {
                             Debug.Print("Logs sent to server");
 
                             // Log list sent to server successfully: delete loglist
                             logList.Clear();
-                            CacheAccess.Store(logList, CacheAccess.LogsCacheFile);
+                            CacheManager.Store(logList, CacheManager.LogsCacheFile);
                         }
                         else
                         {

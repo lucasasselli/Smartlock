@@ -35,8 +35,8 @@ namespace SmartLock
             Debug.Print("Program started!");
 
             // Static init
-            CacheAccess.Init(sdCard);
-            SettingsHelper.Init();
+            CacheManager.Init(sdCard);
+            SettingsManager.Init();
 
             dataHelper = new DataHelper(ethernetJ11D);
 
@@ -125,7 +125,7 @@ namespace SmartLock
          */
         private void PinFound(string pin)
         {
-            string masterPin = SettingsHelper.Get(SettingsHelper.MasterPin);
+            string masterPin = SettingsManager.Get(SettingsManager.MasterPin);
 
             // Check master pin
             if (String.Compare(masterPin, pin) == 0)

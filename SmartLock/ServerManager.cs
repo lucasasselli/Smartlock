@@ -9,16 +9,18 @@ using GTM = Gadgeteer.Modules;
 
 namespace SmartLock
 {
-    public class DatabaseAccess
+    public class ServerManager
     {
         // Request + JSON stuff
+        private const string DataRequest = "data";
+        private const string TimeRequest = "time";
         private const string UserHeader = "AllowedUsers";
         private const string LogHeader = "Log";
 
         // Loads userlist from db
         public bool RequestUsers(ArrayList userList)
         {
-            string url = buildUrlFromSettings();
+            string url = buildUrlFromSettings(DataRequest);
             var request = WebRequest.Create(url) as HttpWebRequest;
             try
             {
@@ -46,11 +48,42 @@ namespace SmartLock
             return true;
         }
 
+        // Request current timestamp
+        public DateTime RequestTime()
+        {
+            string responseString = null;
+            string url = buildUrlFromSettings(TimeRequest);
+            var request = WebRequest.Create(url) as HttpWebRequest;
+            try
+            {
+                if (request != null)
+                    using (var response = request.GetResponse() as HttpWebResponse)
+                    {
+                        if (response != null && response.StatusCode == HttpStatusCode.OK)
+                        {
+                            var responseStream = response.GetResponseStream();
+                            var responseReader = new StreamReader(responseStream);
+                            responseString = responseReader.ReadToEnd();
+                            responseStream.Close();
+                            responseReader.Close();
+
+                            return Utils.StringToDateTime(responseString);
+                        }
+                    }
+            }
+            catch (Exception e)
+            {
+                Debug.Print("ERROR: Exception while getting time: " + e);
+            }
+
+            return DateTime.MinValue;
+        }
+
         // Sends log to db
         public bool SendLogs(ArrayList logList)
         {
             var jsonString = Json.BuildNamedArray(LogHeader, logList);
-            string url = buildUrlFromSettings();
+            string url = buildUrlFromSettings(DataRequest);
             var request = WebRequest.Create(url) as HttpWebRequest;
             var requestByteArray = Encoding.UTF8.GetBytes(jsonString);
 
@@ -107,12 +140,12 @@ namespace SmartLock
             return true;
         }
 
-        private string buildUrlFromSettings()
+        private string buildUrlFromSettings(string field)
         {
-            string ServerIp = SettingsHelper.Get(SettingsHelper.ServerIp);
-            string ServerPort = SettingsHelper.Get(SettingsHelper.ServerPort);
-            string LockId = SettingsHelper.Get(SettingsHelper.LockId);
-            return "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/data/?id=" + LockId;
+            string ServerIp = SettingsManager.Get(SettingsManager.ServerIp);
+            string ServerPort = SettingsManager.Get(SettingsManager.ServerPort);
+            string LockId = SettingsManager.Get(SettingsManager.LockId);
+            return "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/" + field + "/?id=" + LockId;
         }
     }
 }

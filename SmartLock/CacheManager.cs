@@ -5,7 +5,7 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    internal static class CacheAccess
+    internal static class CacheManager
     {
         private const int mountAttempts = 10;
         private const int mountAttemptPeriod = 100;

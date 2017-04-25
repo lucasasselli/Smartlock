@@ -5,7 +5,7 @@ using Microsoft.SPOT;
 
 namespace SmartLock
 {
-    internal static class SettingsHelper
+    internal static class SettingsManager
     {
         // Settings
         public const int ServerIp = 0;
@@ -23,7 +23,7 @@ namespace SmartLock
         public static void Init()
         {
             // Load the settings from a temporary Arraylist
-            if (CacheAccess.Load(settingArray, CacheAccess.SettingsFile)) { 
+            if (CacheManager.Load(settingArray, CacheManager.SettingsFile)) { 
                 if (settingArray.Count == defaultArray.Length)
                 {
                     return;
@@ -52,7 +52,7 @@ namespace SmartLock
             if (id < settingArray.Count)
             {
                 settingArray[id] = content;
-                return CacheAccess.Store(settingArray, CacheAccess.SettingsFile);
+                return CacheManager.Store(settingArray, CacheManager.SettingsFile);
             }
             else
             {
