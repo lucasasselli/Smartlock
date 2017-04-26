@@ -10,7 +10,7 @@ namespace SmartLock
      */
 
     [Serializable]
-    public class UserForLock
+    public class User
     {
         public string Pin { get; set; }
         public string CardID { get; set; }

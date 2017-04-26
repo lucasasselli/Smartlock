@@ -95,7 +95,7 @@ namespace SmartLock
         // Access Management
         public bool CheckCardId(string cardId)
         {
-            foreach (UserForLock user in userList)
+            foreach (User user in userList)
                 if (string.Compare(cardId, user.CardID) == 0)
                     return true;
 
@@ -104,7 +104,7 @@ namespace SmartLock
 
         public bool CheckPin(string pin)
         {
-            foreach (UserForLock user in userList)
+            foreach (User user in userList)
                 if (string.Compare(pin, user.Pin) == 0)
                     return true;
 
@@ -113,7 +113,7 @@ namespace SmartLock
 
         public bool PinHasNullCardId(string pin)
         {
-            foreach (UserForLock user in userList)
+            foreach (User user in userList)
                 if (string.Compare(pin, user.Pin) == 0)
                     if (user.CardID != null)
                         if (string.Compare(string.Empty, user.CardID) == 0)
@@ -128,7 +128,7 @@ namespace SmartLock
 
         public void AddCardId(string pin, string cardId)
         {
-            foreach (UserForLock user in userList)
+            foreach (User user in userList)
                 if (user.Pin == pin)
                 {
                     user.CardID = cardId;
@@ -295,7 +295,7 @@ namespace SmartLock
             {
                 ArrayList tempUserList = new ArrayList();
 
-                if (Json.ParseNamedArray(UserHeader, result.Content, tempUserList, typeof(UserForLock)))
+                if (Json.ParseNamedArray(UserHeader, result.Content, tempUserList, typeof(User)))
                 {
                     // Copy content to main list
                     // NOTE: CopyFrom clears list automatically
