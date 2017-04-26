@@ -44,6 +44,7 @@ namespace SmartLock
             adafruit_PN532.TagFound += TagFound;
             pinWindow.PinFound += PinFound;
             dataHelper.DataSourceChanged += DataSourceChanged;
+            WindowManager.WindowChanged += WindowChanged;
 
             // Set scan window
             scanWindow.SetText("Please scan your NFC card now...");
@@ -55,12 +56,11 @@ namespace SmartLock
             pinWindow.Id = WindowPinId;
             scanWindow.Id = WindowScanId;
 
-            WindowManger.MainWindow = pinWindow;
-            WindowManger.WindowChanged += WindowChanged;
-            WindowManger.Show(pinWindow);
+            pinWindow.Show();
 
             dataHelper.Init();
             adafruit_PN532.Init();
+
         }
 
         /*
@@ -166,7 +166,6 @@ namespace SmartLock
                 {
                     // User wants to add a new NFC card
                     pendingPin = pin;
-                    nullCardIdAlert.Dismiss();
                     scanWindow.Show();
                 });
                 nullCardIdAlert.SetNegativeButton("No", delegate

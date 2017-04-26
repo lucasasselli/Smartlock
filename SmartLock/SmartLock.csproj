@@ -42,11 +42,8 @@
     <Compile Include="DataHelper.cs" />
     <Compile Include="GUI\InputWindow.cs" />
     <Compile Include="GUI\MaintenanceWindow.cs" />
-    <Compile Include="GUI\PinWindow.cs" />
     <Compile Include="Remote.cs" />
-    <Compile Include="ServerManager.cs" />
-    <Compile Include="GUI\SettingWindow.cs" />
-    <Compile Include="GUI\WindowManger.cs" />
+    <Compile Include="GUI\WindowManager.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="Program.generated.cs">
       <AutoGen>True</AutoGen>
@@ -64,8 +61,6 @@
     </Compile>
     <Compile Include="SettingsManager.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="GUI\AccessWindow.cs" />
-    <Compile Include="GUI\AlertWindow.cs" />
     <Compile Include="GUI\TimedWindow.cs" />
   </ItemGroup>
   <ItemGroup>

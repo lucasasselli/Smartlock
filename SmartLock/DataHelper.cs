@@ -22,9 +22,6 @@ namespace SmartLock
         public const int DataSourceCache = 2;
         public const int DataSourceRemote = 3;
 
-        // Wrapped classes
-        private readonly ServerManager serverManager;
-
         // Ethernet object
         private readonly EthernetJ11D ethernetJ11D;
 
@@ -32,9 +29,11 @@ namespace SmartLock
         private readonly ArrayList logList = new ArrayList();
         private readonly ArrayList userList = new ArrayList();
 
-        // Temp holders (CLEAN BEFORE USE!)
-        private readonly ArrayList tempLogList = new ArrayList();
-        private readonly ArrayList tempUserList = new ArrayList();
+        // Server + JSON stuff
+        private const string DataRequest = "data";
+        private const string TimeRequest = "time";
+        private const string UserHeader = "AllowedUsers";
+        private const string LogHeader = "Log";
 
         // Thread
         private bool threadRunning;
@@ -45,8 +44,6 @@ namespace SmartLock
 
         public DataHelper(EthernetJ11D ethernetJ11D)
         {
-            serverManager = new ServerManager();
-
             threadWaitForStop = new ManualResetEvent(false);
 
             this.ethernetJ11D = ethernetJ11D;
@@ -65,10 +62,9 @@ namespace SmartLock
         public void Init()
         {
             // Load users from cache
-            if (CacheManager.Load(tempUserList, CacheManager.UsersCacheFile))
+            if (CacheManager.Load(userList, CacheManager.UsersCacheFile))
             {
-                Debug.Print(tempUserList.Count + " users loaded from cache!");
-                Utils.ArrayListCopy(tempUserList, userList);
+                Debug.Print(userList.Count + " users loaded from cache!");
 
                 // Data source is now cache
                 ChangeDataSource(DataSourceCache);
@@ -77,13 +73,20 @@ namespace SmartLock
             {
                 // Empty data cache is assumed as an error!
                 if (DataSourceChanged != null) DataSourceChanged(DataSourceError);
+
+                // Clear user list
+                userList.Clear();
             }
 
             // Load logs from cache if any
-            if (CacheManager.Load(tempLogList, CacheManager.LogsCacheFile))
+            if (CacheManager.Load(logList, CacheManager.LogsCacheFile))
             {
-                Debug.Print(tempLogList.Count + " logs loaded from cache!");
-                Utils.ArrayListCopy(tempLogList, logList);
+                Debug.Print(logList.Count + " logs loaded from cache!");
+            }
+            else
+            {
+                // Clear log list
+                logList.Clear();
             }
         }
 
@@ -182,68 +185,15 @@ namespace SmartLock
                     Debug.Print("Beginning server polling routine...");
 
                     // Request current time
-                    DateTime rtcDt = RealTimeClock.GetDateTime();
-                    DateTime serverDt = serverManager.RequestTime();
-
-                    if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
-                    {
-                        if (DateTime.Compare(serverDt, rtcDt) != 0)
-                        {
-                            // Found time mismatch
-                            Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
-                            Debug.Print("Setting RTC...");
-                            RealTimeClock.SetDateTime(serverDt);
-
-                            Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
-                        }
-                    }
+                    requestTime();
                     
-                    // Clean temporary list
-                    tempUserList.Clear();
-
-                    Debug.Print("Requesting user list to server...");
-
-                    if (serverManager.RequestUsers(tempUserList))
-                    {
-                        // Copy content to main list
-                        userList.Clear();
-                        Utils.ArrayListCopy(tempUserList, userList);
-
-                        // Store cache copy
-                        CacheManager.Store(userList, CacheManager.UsersCacheFile);
-
-                        // Data source is now remote
-                        ChangeDataSource(DataSourceRemote);
-
-                        Debug.Print(userList.Count + " users received from server");
-                    }
-                    else
-                    {
-                        Debug.Print("ERROR: User list request failed!");
-
-                        // Data source is now cache
-                        if (userList.Count > 0)
-                            ChangeDataSource(DataSourceCache);
-                        else
-                            ChangeDataSource(DataSourceError);
-                    }
+                    // Request users
+                    requestUsers();
 
                     if (logList.Count > 0)
                     {
                         Debug.Print(logList.Count + " stored logs must be sent to server!");
-                        // Send accumulated logs
-                        if (serverManager.SendLogs(logList))
-                        {
-                            Debug.Print("Logs sent to server");
-
-                            // Log list sent to server successfully: delete loglist
-                            logList.Clear();
-                            CacheManager.Store(logList, CacheManager.LogsCacheFile);
-                        }
-                        else
-                        {
-                            Debug.Print("ERROR: Log sending failed!");
-                        }
+                        sendLogs();
                     }
                 }
                 else
@@ -313,6 +263,117 @@ namespace SmartLock
         public int GetDataSource()
         {
             return dataSource;
+        }
+
+
+        /*
+         * Server Access
+         */
+        private string buildUrlFromSettings(string field)
+        {
+            string ServerIp = SettingsManager.Get(SettingsManager.ServerIp);
+            string ServerPort = SettingsManager.Get(SettingsManager.ServerPort);
+            string LockId = SettingsManager.Get(SettingsManager.LockId);
+            return "http://" + ServerIp + ":" + ServerPort + "/SmartLockRESTService/" + field + "/?id=" + LockId;
+        }
+
+
+        // Loads userlist from server
+        private void requestUsers()
+        {
+            // Create URL
+            string url = buildUrlFromSettings(DataRequest);
+
+            // Send request
+            Debug.Print("Requesting user list to server...");
+            Remote.Result result = Remote.Get(url);
+
+            // Parse response
+            if (result.Success)
+            {
+                ArrayList tempUserList = new ArrayList();
+
+                if (Json.ParseNamedArray(UserHeader, result.Content, tempUserList, typeof(UserForLock)))
+                {
+                    // Copy content to main list
+                    // NOTE: ArrayListCopy clears list automatically
+                    Utils.ArrayListCopy(tempUserList, userList);
+
+                    // Store cache copy
+                    CacheManager.Store(userList, CacheManager.UsersCacheFile);
+
+                    // Data source is now remote
+                    ChangeDataSource(DataSourceRemote);
+
+                    Debug.Print(userList.Count + " users received from server");
+                }
+                else
+                {
+                    Debug.Print("ERROR: User list request failed!");
+
+                    // Data source is now cache
+                    if (userList.Count > 0)
+                        ChangeDataSource(DataSourceCache);
+                    else
+                        ChangeDataSource(DataSourceError);
+                }
+            }
+        }
+
+        // Get current time from server
+        private void requestTime()
+        {
+            string url = buildUrlFromSettings(TimeRequest);
+
+            Remote.Result result = Remote.Get(url);
+
+            if (result.Success)
+            {
+                // Request current time
+                DateTime rtcDt = RealTimeClock.GetDateTime();
+                DateTime serverDt = Utils.StringToDateTime(result.Content);
+
+                if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
+                {
+                    if (DateTime.Compare(serverDt, rtcDt) != 0)
+                    {
+                        // Found time mismatch
+                        Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                        Debug.Print("Setting RTC...");
+                        RealTimeClock.SetDateTime(serverDt);
+
+                        Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                        AddLog(log);
+                    }
+                }
+            }
+        }
+
+        // Sends log to server
+        private void sendLogs()
+        {
+            // Create JSON String
+            var jsonString = Json.BuildNamedArray(LogHeader, logList);
+
+            // Create URL
+            string url = buildUrlFromSettings(DataRequest);
+
+            // Send request
+            Debug.Print("Sending logs to server...");
+            Remote.Result result = Remote.Post(url, jsonString);
+
+            if (result.Success)
+            {
+                Debug.Print("Logs sent to server");
+
+                // Log list sent to server successfully: delete loglist
+                logList.Clear();
+                CacheManager.Store(logList, CacheManager.LogsCacheFile);
+            }
+            else
+            {
+                Debug.Print("ERROR: Log sending failed!");
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.SPOT;
 
 namespace SmartLock.GUI
 {
-    public abstract class InputWindow : ManageableWindow
+    public abstract class InputWindow : WindowManager.ManageableWindow
     {
         // Window elements
         protected readonly Button bt0 ;
@@ -165,7 +165,7 @@ namespace SmartLock.GUI
 
         protected virtual void bback_TapEvent(object sender)
         {
-            Dismiss();
+            WindowManager.Back();
         }
 
         protected virtual void bdot_TapEvent(object sender)
@@ -193,6 +193,64 @@ namespace SmartLock.GUI
         protected virtual void benter_TapEvent(object sender)
         {
             // Empty
+        }
+    }
+
+    public class PinWindow : InputWindow
+    {
+        public delegate void PinEventHandler(string pin);
+
+        public PinWindow()
+            : base(false, false)
+        {
+            SetDataSource(DataHelper.DataSourceUnknown);
+        }
+
+        // Event handling
+        public event PinEventHandler PinFound;
+
+        public void SetDataSource(int dataSource)
+        {
+            switch (dataSource)
+            {
+                case DataHelper.DataSourceCache:
+                    SetIcon(Resources.GetBytes(Resources.BinaryResources.data_source_cache));
+                    break;
+
+                case DataHelper.DataSourceRemote:
+                    SetIcon(Resources.GetBytes(Resources.BinaryResources.data_source_remote));
+                    break;
+
+                default:
+                    SetIcon(Resources.GetBytes(Resources.BinaryResources.data_source_error));
+                    break;
+            }
+        }
+
+        protected override void benter_TapEvent(object sender)
+        {
+            if (PinFound != null) PinFound(Input);
+            Clear();
+        }
+    }
+
+    public class SettingWindow : InputWindow
+    {
+
+        private int id;
+
+        public SettingWindow(int id, bool hasDotButton)
+            : base(hasDotButton, true)
+        {
+            this.id = id;
+            string currentValue = SettingsManager.Get(id);
+            SetInput(currentValue);
+        }
+
+        protected override void benter_TapEvent(object sender)
+        {
+            SettingsManager.Set(id, Input);
+            WindowManager.Back();
         }
     }
 }

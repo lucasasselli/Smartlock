@@ -4,7 +4,7 @@ using GHI.Glide.UI;
 
 namespace SmartLock.GUI
 {
-    public class MaintenanceWindow : ManageableWindow
+    public class MaintenanceWindow : WindowManager.ManageableWindow
     {
         // Time constants
         private const int WindowAlertPeriod = 10000;
@@ -35,7 +35,7 @@ namespace SmartLock.GUI
         void bback_TapEvent(object sender)
         {
             // Back to main window
-            WindowManger.Back();
+            WindowManager.Back();
         }
 
         void bip_TapEvent(object sender)

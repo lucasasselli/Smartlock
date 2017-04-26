@@ -12,7 +12,7 @@ namespace SmartLock
     class Remote
     {
         // Request current timestamp
-        public static RemoteResponse Get(string url)
+        public static Result Get(string url)
         {
             string responseString = null;
             var request = WebRequest.Create(url) as HttpWebRequest;
@@ -26,7 +26,7 @@ namespace SmartLock
                         if (response == null || response.StatusCode != HttpStatusCode.OK)
                         {
                             Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
-                            return new RemoteResponse(false, null);
+                            return new Result(false, null);
                         }
 
                         var responseStream = response.GetResponseStream();
@@ -35,7 +35,7 @@ namespace SmartLock
                         responseStream.Close();
                         responseReader.Close();
 
-                        return new RemoteResponse(true, responseString);
+                        return new Result(true, responseString);
                         
                     }
                 }
@@ -45,11 +45,11 @@ namespace SmartLock
                 Debug.Print("ERROR: Exception while performing GET: " + e);
             }
 
-            return new RemoteResponse(false, null);
+            return new Result(false, null);
         }
 
 
-        public static RemoteResponse Post(string url, string body)
+        public static Result Post(string url, string body)
         {
             var request = WebRequest.Create(url) as HttpWebRequest;
             var requestByteArray = Encoding.UTF8.GetBytes(body);
@@ -77,7 +77,7 @@ namespace SmartLock
                         if (response == null || response.StatusCode != HttpStatusCode.OK)
                         {
                             Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
-                            return new RemoteResponse(false, null);
+                            return new Result(false, null);
                         }
 
                         // Grab the response
@@ -90,7 +90,7 @@ namespace SmartLock
                                     responseValue = reader.ReadToEnd();
                                 }
 
-                                return new RemoteResponse(true, responseValue);
+                                return new Result(true, responseValue);
                             }
                         }                     
                     }
@@ -99,23 +99,22 @@ namespace SmartLock
             catch (Exception e)
             {
                 Debug.Print("ERROR: Exception while performing POST: " + e);
-                return new RemoteResponse(false, null);
+                return new Result(false, null);
             }
 
-            return new RemoteResponse(false, null);
+            return new Result(false, null);
         }
-    }
 
-    public class RemoteResponse
-    {
-        bool success { private set; get; }
-        string content { private set; get; }
-
-        internal RemoteResponse(bool success, string content)
+        public class Result
         {
-            this.success = success;
-            this.content = content;
+            public bool Success { private set; get; }
+            public string Content { private set; get; }
+
+            internal Result(bool success, string content)
+            {
+                Success = success;
+                Content = content;
+            }
         }
     }
-
 }
