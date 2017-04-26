@@ -80,21 +80,26 @@ namespace SmartLock
 
                 // Log the event
                 string logText;
+                Log log;
+
                 if (authorized)
                 {
                     // Access granted
                     UnlockDoor();
                     logText = "Card \"" + uid + "\" inserted. Authorized access.";
+                    log = new Log(Log.TypeAccess, null, uid, logText);
                 }
                 else
                 {
                     // Access denied
-                    logText = "Card \"" + uid + "\" inserted. Access denied!";
+                    logText = "Pin \"" + uid + "\" inserted. Access denied!";
+                    log = new Log(Log.TypeError, logText);
                 }
 
                 Debug.Print(logText);
-                var accessLog = new Log(Log.TypeAccess, uid, logText);
-                dataHelper.AddLog(accessLog); //add log to log list
+
+                // Add log to loglist
+                dataHelper.AddLog(log);
             }
             else
             {
@@ -139,24 +144,28 @@ namespace SmartLock
 
             // Log the event
             string logText;
+            Log log;
+
             if (authorized)
             {
                 // Access granted
                 UnlockDoor();
                 logText = "Pin \"" + pin + "\" inserted. Authorized access.";
+                log = new Log(Log.TypeAccess, pin, logText);
             }
             else
             {
                 // Access denied
                 logText = "Pin \"" + pin + "\" inserted. Access denied!";
+                log = new Log(Log.TypeError, logText);
             }
 
-
             Debug.Print(logText);
-            var accessLog = new Log(Log.TypeAccess, pin, logText, DateTime.Now.ToString());
-            dataHelper.AddLog(accessLog); //add log to log list
 
-            if (nullCardId)
+            // Add log to loglist
+            dataHelper.AddLog(log);
+
+            if (nullCardId && authorized)
             {
                 // Null CardID detected, prompt the user to set one
                 var nullCardIdAlert = new AlertWindow(WindowAlertPeriod);

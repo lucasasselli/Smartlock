@@ -43,6 +43,7 @@ namespace SmartLock
         private readonly ManualResetEvent threadWaitForStop;
 
         private int dataSource;
+        private bool timeChecked = false;
 
         public DataHelper(EthernetJ11D ethernetJ11D)
         {
@@ -184,19 +185,23 @@ namespace SmartLock
             {
                 if (ethernetJ11D.IsNetworkUp)
                 {
-                    Debug.Print("Beginning server polling routine...");
+                    Debug.Print("Beginning server routine...");
 
                     // Request current time
-                    requestTime();
-                    
-                    // Request users
-                    requestUsers();
+                    if (!timeChecked)
+                    {
+                        requestTime();
+                    }
 
+                    // Send logs
                     if (logList.Count > 0)
                     {
                         Debug.Print(logList.Count + " stored logs must be sent to server!");
                         sendLogs();
                     }
+                    
+                    // Request users
+                    requestUsers();
                 }
                 else
                 {
@@ -205,9 +210,15 @@ namespace SmartLock
 
                 // Plan next connection
                 if (dataSource != DataSourceRemote && ethernetJ11D.IsNetworkUp)
+                {
+                    Debug.Print("Server routine failed to retrieve userlist! Next event in " + ThreadPeriodLong);
                     threadWaitForStop.WaitOne(ThreadPeriodShort, true);
+                }
                 else
+                {
+                    Debug.Print("Server routine completed! Next event in " + ThreadPeriodLong);
                     threadWaitForStop.WaitOne(ThreadPeriodLong, true);
+                }
 
                 threadWaitForStop.Reset();
             }
@@ -337,17 +348,23 @@ namespace SmartLock
 
                 if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
                 {
-                    // TODO Fix
-                    if (serverDt.WeakCompare(rtcDt))
+                    if (!serverDt.WeakCompare(rtcDt))
                     {
                         // Found time mismatch
-                        Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                        Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
                         Debug.Print("Setting RTC...");
-                        RealTimeClock.SetDateTime(serverDt);
-
-                        Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());
+                        Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
                         AddLog(log);
+
+                        RealTimeClock.SetDateTime(serverDt);
                     }
+                    else
+                    {
+                        Debug.Print("RTC already synced with server time!");
+                    }
+
+                    // RTC time is now valid
+                    timeChecked = true;
                 }
             }
         }

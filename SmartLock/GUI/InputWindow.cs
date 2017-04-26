@@ -175,7 +175,7 @@ namespace SmartLock.GUI
 
         protected virtual void btdel_TapEvent(object sender)
         {
-            if (Input.Length != 0)
+            if (Input != null && Input.Length != 0)
             {
                 Input = Input.Substring(0, Input.Length - 1);
                 textBox.Text = Input;

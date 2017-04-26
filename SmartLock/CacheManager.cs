@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Gadgeteer.Modules.GHIElectronics;
 using Microsoft.SPOT;
+using Microsoft.SPOT.IO;
 using ArrayListExtension;
 
 namespace SmartLock
@@ -47,6 +48,7 @@ namespace SmartLock
                 data = new byte[f.Length];
                 f.Read(data, 0, data.Length);
                 f.Close();
+                VolumeInfo.GetVolumes()[0].FlushAll();
             }
             catch (Exception e)
             {
@@ -56,7 +58,7 @@ namespace SmartLock
 
             try
             {
-                var temp = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
+                var temp = (ArrayList)Reflection.Deserialize(data, typeof(ArrayList));
                 list.CopyFrom(temp);
             }
             catch (Exception e)
@@ -104,6 +106,7 @@ namespace SmartLock
                 var f = sdCard.StorageDevice.OpenWrite(file);
                 f.Write(data, 0, data.Length);
                 f.Close();
+                VolumeInfo.GetVolumes()[0].FlushAll();
             }
             catch (Exception e)
             {
@@ -130,12 +133,16 @@ namespace SmartLock
             {
                 // Write data
                 sdCard.StorageDevice.Delete(file);
+                VolumeInfo.GetVolumes()[0].FlushAll();
+
             }
             catch (Exception e)
             {
                 Debug.Print("ERROR: Exception while deleting \"" + file + "\": " + e);
                 return false;
             }
+
+            Debug.Print("File \"" + file + "\" successfully deleted");
 
             return true;
         }
