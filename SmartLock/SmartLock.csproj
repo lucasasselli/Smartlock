@@ -39,7 +39,9 @@
   <!-- Everything below here is custom to .NET MF / Gadgeteer template-->
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
+    <Compile Include="Extensions\ArrayListExtension.cs" />
     <Compile Include="DataHelper.cs" />
+    <Compile Include="Extensions\DateTimeExtension.cs" />
     <Compile Include="GUI\InputWindow.cs" />
     <Compile Include="GUI\MaintenanceWindow.cs" />
     <Compile Include="Remote.cs" />
@@ -60,7 +62,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SettingsManager.cs" />
-    <Compile Include="Utils.cs" />
     <Compile Include="GUI\TimedWindow.cs" />
   </ItemGroup>
   <ItemGroup>

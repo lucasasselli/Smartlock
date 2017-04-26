@@ -35,6 +35,7 @@ namespace SmartLock
                         responseStream.Close();
                         responseReader.Close();
 
+                        Debug.Print("Server Response: " + responseString);
                         return new Result(true, responseString);
                         
                     }
@@ -71,7 +72,7 @@ namespace SmartLock
                     // Grab the response
                     using (var response = request.GetResponse() as HttpWebResponse)
                     {
-                        var responseValue = string.Empty;
+                        var responseString = string.Empty;
 
                         // Error
                         if (response == null || response.StatusCode != HttpStatusCode.OK)
@@ -87,10 +88,11 @@ namespace SmartLock
                             {
                                 using (var reader = new StreamReader(responseStream))
                                 {
-                                    responseValue = reader.ReadToEnd();
+                                    responseString = reader.ReadToEnd();
                                 }
 
-                                return new Result(true, responseValue);
+                                Debug.Print("Server Response: " + responseString);
+                                return new Result(true, responseString);
                             }
                         }                     
                     }

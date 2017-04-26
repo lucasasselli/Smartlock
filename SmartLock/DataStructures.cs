@@ -1,5 +1,6 @@
 using System;
 using GHI.Processor;
+using DateTimeExtension;
 
 namespace SmartLock
 {
@@ -29,14 +30,14 @@ namespace SmartLock
             Pin = pin;
             CardID = cardId;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToString();
+            DateTime = RealTimeClock.GetDateTime().ToMyString();
         }
 
         public Log(int type, string text)
         {
             Type = type;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToString();
+            DateTime = RealTimeClock.GetDateTime().ToMyString();
         }
 
         public Log(int type, string pin, string text)
@@ -44,7 +45,7 @@ namespace SmartLock
             Type = type;
             Pin = pin;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToString();
+            DateTime = RealTimeClock.GetDateTime().ToMyString();
         }
 
         public int Type { get; set; }

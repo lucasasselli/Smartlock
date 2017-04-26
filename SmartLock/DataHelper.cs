@@ -6,6 +6,8 @@ using Microsoft.SPOT;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using GHI.Processor;
+using DateTimeExtension;
+using ArrayListExtension;
 
 namespace SmartLock
 {
@@ -296,8 +298,8 @@ namespace SmartLock
                 if (Json.ParseNamedArray(UserHeader, result.Content, tempUserList, typeof(UserForLock)))
                 {
                     // Copy content to main list
-                    // NOTE: ArrayListCopy clears list automatically
-                    Utils.ArrayListCopy(tempUserList, userList);
+                    // NOTE: CopyFrom clears list automatically
+                    userList.CopyFrom(tempUserList);
 
                     // Store cache copy
                     CacheManager.Store(userList, CacheManager.UsersCacheFile);
@@ -331,11 +333,12 @@ namespace SmartLock
             {
                 // Request current time
                 DateTime rtcDt = RealTimeClock.GetDateTime();
-                DateTime serverDt = Utils.StringToDateTime(result.Content);
+                DateTime serverDt = result.Content.ToDateTime();
 
                 if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
                 {
-                    if (DateTime.Compare(serverDt, rtcDt) != 0)
+                    // TODO Fix
+                    if (serverDt.WeakCompare(rtcDt))
                     {
                         // Found time mismatch
                         Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToString() + ", RTC: " + rtcDt.ToString());

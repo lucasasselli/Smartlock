@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Gadgeteer.Modules.GHIElectronics;
 using Microsoft.SPOT;
+using ArrayListExtension;
 
 namespace SmartLock
 {
@@ -56,7 +57,7 @@ namespace SmartLock
             try
             {
                 var temp = (ArrayList) Reflection.Deserialize(data, typeof(ArrayList));
-                Utils.ArrayListCopy(temp, list);
+                list.CopyFrom(temp);
             }
             catch (Exception e)
             {

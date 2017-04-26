@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Microsoft.SPOT;
+using ArrayListExtension;
 
 
 namespace SmartLock
@@ -31,7 +32,7 @@ namespace SmartLock
             }
 
             // Something went wrong, load defaults
-            Utils.ArrayToList(defaultArray, settingArray);
+            settingArray = defaultArray.ToArrayList();
         }
 
         public static string Get(int id)

@@ -12,7 +12,7 @@ namespace SmartLock.GUI
     public abstract class TimedWindow : WindowManager.ManageableWindow
     {
         private readonly GT.Timer timerShowWindow;
-        private bool running = true;
+        private bool running;
 
         protected TimedWindow(int period) : base(false)
         {
@@ -23,8 +23,9 @@ namespace SmartLock.GUI
         // Shows the window for "period" time
         public override void Show()
         {
+            running = true;
             base.Show();
-            timerShowWindow.Start();
+            timerShowWindow.Restart();
         }
 
         // Dismisses the window before "period" has expired
