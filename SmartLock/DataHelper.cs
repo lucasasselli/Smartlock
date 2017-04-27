@@ -44,6 +44,7 @@ namespace SmartLock
 
         private int dataSource;
         private bool timeChecked = false;
+        private bool ipAssinged = false;
 
         public DataHelper(EthernetJ11D ethernetJ11D)
         {
@@ -151,8 +152,7 @@ namespace SmartLock
         // Network is online event
         private void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up!");
-            Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
+            Debug.Print("Network is up! Waiting for ip...");
 
             // Start ServerRoutine
             StartRoutine();
@@ -183,41 +183,57 @@ namespace SmartLock
         {
             while (threadRunning)
             {
+                bool success = true;
+
                 if (ethernetJ11D.IsNetworkUp)
                 {
                     Debug.Print("Beginning server routine...");
 
-                    // Request current time
-                    if (!timeChecked)
+                    // Check if ip is valid
+                    if (String.Compare(ethernetJ11D.NetworkSettings.IPAddress, "0.0.0.0") != 0)
                     {
-                        requestTime();
+                        Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
+                    }
+                    else
+                    {
+                        Debug.Print("ERROR: Current IP appears to be null!");
+                        success = false;
+                    }
+
+                    // Request current time
+                    if (success && !timeChecked)
+                    {
+                        success = requestTime();
                     }
 
                     // Send logs
-                    if (logList.Count > 0)
+                    if (success && logList.Count > 0)
                     {
                         Debug.Print(logList.Count + " stored logs must be sent to server!");
-                        sendLogs();
+                        success = sendLogs();
                     }
                     
                     // Request users
-                    requestUsers();
+                    if (success)
+                    {
+                        success = requestUsers();
+                    }
                 }
                 else
                 {
                     Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
                 }
 
-                // Plan next connection
-                if (dataSource != DataSourceRemote && ethernetJ11D.IsNetworkUp)
-                {
-                    Debug.Print("Server routine failed to retrieve userlist! Next event in " + ThreadPeriodLong);
-                    threadWaitForStop.WaitOne(ThreadPeriodShort, true);
-                }
-                else
+                // Plan next routine
+                if (success)
                 {
                     Debug.Print("Server routine completed! Next event in " + ThreadPeriodLong);
                     threadWaitForStop.WaitOne(ThreadPeriodLong, true);
+                }
+                else
+                {
+                    Debug.Print("Server routine failed! Next event in " + ThreadPeriodShort);
+                    threadWaitForStop.WaitOne(ThreadPeriodShort, true);
                 }
 
                 threadWaitForStop.Reset();
@@ -292,7 +308,7 @@ namespace SmartLock
 
 
         // Loads userlist from server
-        private void requestUsers()
+        private bool requestUsers()
         {
             // Create URL
             string url = buildUrlFromSettings(DataRequest);
@@ -331,10 +347,13 @@ namespace SmartLock
                         ChangeDataSource(DataSourceError);
                 }
             }
+
+            // Return result of the operation
+            return result.Success;
         }
 
         // Get current time from server
-        private void requestTime()
+        private bool requestTime()
         {
             string url = buildUrlFromSettings(TimeRequest);
 
@@ -343,8 +362,9 @@ namespace SmartLock
             if (result.Success)
             {
                 // Request current time
-                DateTime rtcDt = RealTimeClock.GetDateTime();
+                Debug.Print("Requesting current time to server...");
                 DateTime serverDt = result.Content.ToDateTime();
+                DateTime rtcDt = RealTimeClock.GetDateTime();
 
                 if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
                 {
@@ -365,12 +385,16 @@ namespace SmartLock
 
                     // RTC time is now valid
                     timeChecked = true;
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
         // Sends log to server
-        private void sendLogs()
+        private bool sendLogs()
         {
             // Create JSON String
             var jsonString = Json.BuildNamedArray(LogHeader, logList);
@@ -394,6 +418,9 @@ namespace SmartLock
             {
                 Debug.Print("ERROR: Log sending failed!");
             }
+
+            // Return result of the operation
+            return result.Success;
         }
     }
 }
