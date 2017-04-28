@@ -115,9 +115,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\alert_alt.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\data_source_cache.bmp" />
   </ItemGroup>
   <ItemGroup>
