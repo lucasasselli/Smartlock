@@ -18,6 +18,11 @@ namespace SmartLock.GUI
 
         private static ArrayList windowStack = new ArrayList();
 
+        public static void Init()
+        {
+            GlideTouch.Initialize();
+        }
+
         internal static void Push(ManageableWindow manageable)
         {
             int lastIndex = getLastIndex();

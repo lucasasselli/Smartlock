@@ -20,9 +20,6 @@ namespace SmartLock
         // Nfc setup
         private string pendingPin;
 
-        // Main Objects
-        private DataHelper dataHelper;
-
         // Windows
         PinWindow pinWindow = new PinWindow();
         AccessWindow accessWindow = new AccessWindow(WindowAccessPeriod);
@@ -33,33 +30,31 @@ namespace SmartLock
         {
             Debug.Print("Program started!");
 
-            // Static init
-            CacheManager.Init(sdCard);
-            SettingsManager.Init();
-
-            dataHelper = new DataHelper(ethernetJ11D);
-
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
             adafruit_PN532.Error += NfcError;
             pinWindow.PinFound += PinFound;
-            dataHelper.DataSourceChanged += DataSourceChanged;
+            DataHelper.DataSourceChanged += DataSourceChanged;
             WindowManager.WindowChanged += WindowChanged;
+
+            //Init
+            CacheManager.Init(sdCard);
+            SettingsManager.Init();
+            DataHelper.Init(ethernetJ11D);
+            WindowManager.Init();
+
+            adafruit_PN532.Init();
 
             // Set scan window
             scanWindow.SetText("Please scan your NFC card now...");
             scanWindow.SetNegativeButton("Cancel", delegate { scanWindow.Dismiss(); });
 
             // Windows and window manager
-            GlideTouch.Initialize();
-
             pinWindow.Id = WindowPinId;
             scanWindow.Id = WindowScanId;
 
             pinWindow.Show();
 
-            dataHelper.Init();
-            adafruit_PN532.Init();
         }
 
         /*
@@ -72,7 +67,7 @@ namespace SmartLock
             if (!scanWindow.IsShowing())
             {
                 // Check authorization
-                var authorized = dataHelper.CheckCardId(uid);
+                var authorized = DataHelper.CheckCardId(uid);
 
                 // Show access window
                 accessWindow.Show(authorized);
@@ -98,7 +93,7 @@ namespace SmartLock
                 Debug.Print(logText);
 
                 // Add log to loglist
-                dataHelper.AddLog(log);
+                DataHelper.AddLog(log);
             }
             else
             {
@@ -110,9 +105,9 @@ namespace SmartLock
                     "Card \"" + uid + "\" has been added for pin \"" + pendingPin + "\".");
 
                 // Update CardID in userList
-                dataHelper.AddCardId(pendingPin, uid);
+                DataHelper.AddCardId(pendingPin, uid);
 
-                dataHelper.AddLog(newCardIdLog);
+                DataHelper.AddLog(newCardIdLog);
 
                 var cardAddedAlert = new AlertWindow(WindowAlertPeriod);
                 cardAddedAlert.SetText("NFC card added!");
@@ -138,8 +133,8 @@ namespace SmartLock
             }
             
             // Check authorization
-            var authorized = dataHelper.CheckPin(pin);
-            var nullCardId = dataHelper.PinHasNullCardId(pin);
+            var authorized = DataHelper.CheckPin(pin);
+            var nullCardId = DataHelper.PinHasNullCardId(pin);
 
             // Log the event
             string logText;
@@ -162,7 +157,7 @@ namespace SmartLock
             Debug.Print(logText);
 
             // Add log to loglist
-            dataHelper.AddLog(log);
+            DataHelper.AddLog(log);
 
             if (nullCardId && authorized)
             {
@@ -235,7 +230,7 @@ namespace SmartLock
         private void NfcError()
         {
             Log log = new Log(Log.TypeError, "NFC Module is not responding!");
-            dataHelper.AddLog(log);
+            DataHelper.AddLog(log);
         }
     }
 }

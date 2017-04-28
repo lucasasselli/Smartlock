@@ -203,7 +203,7 @@ namespace SmartLock.GUI
         public PinWindow()
             : base(false, false)
         {
-            SetDataSource(DataHelper.DataSourceUnknown);
+            SetDataSource(DataHelper.GetDataSource());
         }
 
         // Event handling

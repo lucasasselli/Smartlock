@@ -10,9 +10,8 @@ using ArrayListExtension;
 
 namespace SmartLock
 {
-    internal class DataHelper
+    internal static class DataHelper
     {
-        public delegate void DsChangedEventHandler(int dataSource);
 
         private const int ThreadPeriodLong = 120000; // milliseconds -> 2 min
         private const int ThreadPeriodShort = 10000; // milliseconds -> 10 sec
@@ -23,12 +22,16 @@ namespace SmartLock
         public const int DataSourceCache = 2;
         public const int DataSourceRemote = 3;
 
+        // Event handling
+        public delegate void DsChangedEventHandler(int dataSource);
+        public static event DsChangedEventHandler DataSourceChanged;
+
         // Ethernet object
-        private readonly EthernetJ11D ethernetJ11D;
+        private static EthernetJ11D ethernetJ11D;
 
         // Main data object
-        private readonly ArrayList logList = new ArrayList();
-        private readonly ArrayList userList = new ArrayList();
+        private static readonly ArrayList logList = new ArrayList();
+        private static readonly ArrayList userList = new ArrayList();
 
         // Server + JSON stuff
         private const string DataRequest = "data";
@@ -37,18 +40,17 @@ namespace SmartLock
         private const string LogHeader = "Log";
 
         // Thread
-        private bool threadRunning;
-        private Thread threadRoutine;
-        private readonly ManualResetEvent threadWaitForStop;
+        private static bool threadRunning;
+        private static Thread threadRoutine;
+        private static readonly ManualResetEvent threadWaitForStop = new ManualResetEvent(false);
 
-        private int dataSource;
-        private bool timeChecked = false;
+        private static int dataSource;
+        private static bool timeChecked = false;
 
-        public DataHelper(EthernetJ11D ethernetJ11D)
+        public static void Init(EthernetJ11D _ethernetJ11D)
         {
-            threadWaitForStop = new ManualResetEvent(false);
 
-            this.ethernetJ11D = ethernetJ11D;
+            ethernetJ11D = _ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
             ethernetJ11D.NetworkSettings.EnableDhcp();
             ethernetJ11D.NetworkUp += NetworkUp;
@@ -56,13 +58,7 @@ namespace SmartLock
 
             // Data is not yet loaded, data source is unknown
             ChangeDataSource(DataSourceUnknown);
-        }
 
-        // Event handling
-        public event DsChangedEventHandler DataSourceChanged;
-
-        public void Init()
-        {
             // Load users from cache
             if (CacheManager.Load(userList, CacheManager.UsersCacheFile))
             {
@@ -93,7 +89,7 @@ namespace SmartLock
         }
 
         // Access Management
-        public bool CheckCardId(string cardId)
+        public static bool CheckCardId(string cardId)
         {
             foreach (User user in userList)
                 if (string.Compare(cardId, user.CardID) == 0)
@@ -102,7 +98,7 @@ namespace SmartLock
             return false;
         }
 
-        public bool CheckPin(string pin)
+        public static bool CheckPin(string pin)
         {
             foreach (User user in userList)
                 if (string.Compare(pin, user.Pin) == 0)
@@ -111,7 +107,7 @@ namespace SmartLock
             return false;
         }
 
-        public bool PinHasNullCardId(string pin)
+        public static bool PinHasNullCardId(string pin)
         {
             foreach (User user in userList)
                 if (string.Compare(pin, user.Pin) == 0)
@@ -126,7 +122,7 @@ namespace SmartLock
             return false;
         }
 
-        public void AddCardId(string pin, string cardId)
+        public static void AddCardId(string pin, string cardId)
         {
             foreach (User user in userList)
                 if (user.Pin == pin)
@@ -139,7 +135,7 @@ namespace SmartLock
             CacheManager.Store(userList, CacheManager.UsersCacheFile);
         }
 
-        public void AddLog(Log log)
+        public static void AddLog(Log log)
         {
             logList.Add(log);
 
@@ -154,7 +150,7 @@ namespace SmartLock
         }
 
         // Network is online event
-        private void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
+        private static void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network is up! Waiting for ip...");
 
@@ -163,7 +159,7 @@ namespace SmartLock
         }
 
         // Network is offline event
-        private void NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
+        private static void NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
             Debug.Print("Network is down!");
 
@@ -183,7 +179,7 @@ namespace SmartLock
          * if logs are stored into logList, it sends the logs to the server.
          */
 
-        private void ServerRoutine()
+        private static void ServerRoutine()
         {
             while (threadRunning)
             {
@@ -244,7 +240,7 @@ namespace SmartLock
             }
         }
 
-        public void StartRoutine()
+        public static void StartRoutine()
         {
             threadRunning = true;
 
@@ -267,7 +263,7 @@ namespace SmartLock
             }
         }
 
-        public void StopRoutine()
+        public static void StopRoutine()
         {
             threadRunning = false;
         }
@@ -283,17 +279,19 @@ namespace SmartLock
          */
 
         // Changes the current data source and throws event DataSourceChanged
-        private void ChangeDataSource(int dataSource)
+        private static void ChangeDataSource(int _dataSource)
         {
-            if (this.dataSource != dataSource)
+            if (dataSource != _dataSource)
+            {
+                dataSource = _dataSource;
+
                 if (DataSourceChanged != null)
                     DataSourceChanged(dataSource);
-
-            this.dataSource = dataSource;
+            }
         }
 
         // Returns the current data source
-        public int GetDataSource()
+        public static int GetDataSource()
         {
             return dataSource;
         }
@@ -302,7 +300,7 @@ namespace SmartLock
         /*
          * Server Access
          */
-        private string buildUrlFromSettings(string field)
+        private static string buildUrlFromSettings(string field)
         {
             string ServerIp = SettingsManager.Get(SettingsManager.ServerIp);
             string ServerPort = SettingsManager.Get(SettingsManager.ServerPort);
@@ -312,7 +310,7 @@ namespace SmartLock
 
 
         // Loads userlist from server
-        private bool requestUsers()
+        private static bool requestUsers()
         {
             // Create URL
             string url = buildUrlFromSettings(DataRequest);
@@ -357,7 +355,7 @@ namespace SmartLock
         }
 
         // Get current time from server
-        private bool requestTime()
+        private static bool requestTime()
         {
             string url = buildUrlFromSettings(TimeRequest);
 
@@ -398,7 +396,7 @@ namespace SmartLock
         }
 
         // Sends log to server
-        private bool sendLogs()
+        private static bool sendLogs()
         {
             // Create JSON String
             var jsonString = Json.BuildNamedArray(LogHeader, logList);
