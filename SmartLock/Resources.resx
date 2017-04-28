@@ -125,16 +125,6 @@
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="alert_alt" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\alert_alt.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="alert_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\alert_ok.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="NinaB" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\NinaB.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
-  </data>
   <data name="InputWindow" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="screen1" Width="460" Height="240" BackColor="FFFFFF"&gt;
@@ -159,9 +149,7 @@
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
   </data>
-  <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
-  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="data_source_cache" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\data_source_cache.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
@@ -191,5 +179,11 @@
     &lt;Button Name="bback" X="237" Y="205" Width="80" Height="32" Alpha="255" Text="Back" Font="4" FontColor="000000" DisabledFontColor="808080" TintColor="000000" TintAmount="0"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
+  </data>
+  <data name="alert_alt" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\alert_alt.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="alert_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\alert_ok.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

@@ -136,13 +136,13 @@ namespace SmartLock.GUI
             if (mode)
             {
                 accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_ok),
-                    Bitmap.BitmapImageType.Bmp);
+                    Bitmap.BitmapImageType.Jpeg);
                 accessText.Text = "Access Allowed!";
             }
             else
             {
                 accessImage.Bitmap = new Bitmap(Resources.GetBytes(Resources.BinaryResources.alert_alt),
-                    Bitmap.BitmapImageType.Bmp);
+                    Bitmap.BitmapImageType.Jpeg);
                 accessText.Text = "Access Denied!";
             }
 

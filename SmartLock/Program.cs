@@ -2,7 +2,6 @@
 using Microsoft.SPOT;
 using GHI.Glide;
 using SmartLock.GUI;
-using GT = Gadgeteer;
 
 namespace SmartLock
 {
@@ -42,6 +41,7 @@ namespace SmartLock
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
+            adafruit_PN532.Error += NfcError;
             pinWindow.PinFound += PinFound;
             dataHelper.DataSourceChanged += DataSourceChanged;
             WindowManager.WindowChanged += WindowChanged;
@@ -60,7 +60,6 @@ namespace SmartLock
 
             dataHelper.Init();
             adafruit_PN532.Init();
-
         }
 
         /*
@@ -92,8 +91,8 @@ namespace SmartLock
                 else
                 {
                     // Access denied
-                    logText = "Pin \"" + uid + "\" inserted. Access denied!";
-                    log = new Log(Log.TypeError, logText);
+                    logText = "Card \"" + uid + "\" inserted. Access denied!";
+                    log = new Log(Log.TypeInfo, logText);
                 }
 
                 Debug.Print(logText);
@@ -157,7 +156,7 @@ namespace SmartLock
             {
                 // Access denied
                 logText = "Pin \"" + pin + "\" inserted. Access denied!";
-                log = new Log(Log.TypeError, logText);
+                log = new Log(Log.TypeInfo, logText);
             }
 
             Debug.Print(logText);
@@ -227,6 +226,16 @@ namespace SmartLock
                 adafruit_PN532.StartScan(NfcScanPeriod, NfcScanTimeout);
             else
                 adafruit_PN532.StopScan();
+        }
+
+        /*
+         * NFC ERROR EVENT:
+         * This event occurs when the nfc module is not responding to commands.
+         */
+        private void NfcError()
+        {
+            Log log = new Log(Log.TypeError, "NFC Module is not responding!");
+            dataHelper.AddLog(log);
         }
     }
 }

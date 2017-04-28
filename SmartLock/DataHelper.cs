@@ -3,7 +3,6 @@ using System.Collections;
 using System.Threading;
 using Gadgeteer.Modules.GHIElectronics;
 using Microsoft.SPOT;
-using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using GHI.Processor;
 using DateTimeExtension;
@@ -44,7 +43,6 @@ namespace SmartLock
 
         private int dataSource;
         private bool timeChecked = false;
-        private bool ipAssinged = false;
 
         public DataHelper(EthernetJ11D ethernetJ11D)
         {
@@ -147,6 +145,12 @@ namespace SmartLock
 
             // Update cache copy
             CacheManager.Store(logList, CacheManager.LogsCacheFile);
+
+            // If log is error start routine immediately
+            if (log.Type == Log.TypeError)
+            {
+                threadWaitForStop.Set();
+            }
         }
 
         // Network is online event
@@ -373,7 +377,7 @@ namespace SmartLock
                         // Found time mismatch
                         Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
                         Debug.Print("Setting RTC...");
-                        Log log = new Log(Log.TypeError, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
+                        Log log = new Log(Log.TypeInfo, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
                         AddLog(log);
 
                         RealTimeClock.SetDateTime(serverDt);
