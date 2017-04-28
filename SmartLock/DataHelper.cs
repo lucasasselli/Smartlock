@@ -155,7 +155,7 @@ namespace SmartLock
             Debug.Print("Network is up! Waiting for ip...");
 
             // Start ServerRoutine
-            StartRoutine();
+            startRoutine();
         }
 
         // Network is offline event
@@ -170,7 +170,7 @@ namespace SmartLock
                 ChangeDataSource(DataSourceError);
 
             // Stop ServerRoutine
-            StopRoutine();
+            stopRoutine();
         }
 
         /*
@@ -240,7 +240,7 @@ namespace SmartLock
             }
         }
 
-        public static void StartRoutine()
+        private static void startRoutine()
         {
             threadRunning = true;
 
@@ -263,7 +263,7 @@ namespace SmartLock
             }
         }
 
-        public static void StopRoutine()
+        private static void stopRoutine()
         {
             threadRunning = false;
         }
