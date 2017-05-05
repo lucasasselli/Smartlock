@@ -107,7 +107,8 @@ namespace SmartLock
                 // Update CardID in userList
                 DataHelper.AddCardId(pendingPin, uid);
 
-                DataHelper.AddLog(newCardIdLog);
+                // Send urgent log
+                DataHelper.AddLog(newCardIdLog, true);
 
                 var cardAddedAlert = new AlertWindow(WindowAlertPeriod);
                 cardAddedAlert.SetText("NFC card added!");

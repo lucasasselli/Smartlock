@@ -20,9 +20,17 @@ namespace SmartLock
     [Serializable]
     public class Log
     {
+        // Types
         public const int TypeAccess = 1;
         public const int TypeInfo = 2;
         public const int TypeError = 4;
+
+        // Fields
+        public int Type { get; set; }
+        public string Pin { get; set; }
+        public string CardID { get; set; }
+        public string Text { get; set; }
+        public string DateTime { get; set; }
 
         public Log(int type, string pin, string cardId, string text)
         {
@@ -47,11 +55,5 @@ namespace SmartLock
             Text = text;
             DateTime = RealTimeClock.GetDateTime().ToMyString();
         }
-
-        public int Type { get; set; }
-        public string Pin { get; set; }
-        public string CardID { get; set; }
-        public string Text { get; set; }
-        public string DateTime { get; set; }
     } 
 }

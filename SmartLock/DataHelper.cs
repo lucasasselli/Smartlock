@@ -52,7 +52,7 @@ namespace SmartLock
 
             ethernetJ11D = _ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
-            ethernetJ11D.NetworkSettings.EnableDhcp();
+            ethernetJ11D.UseStaticIP("192.168.1.109", "255.255.255.0", "192.168.100.1");
             ethernetJ11D.NetworkUp += NetworkUp;
             ethernetJ11D.NetworkDown += NetworkDown;
 
@@ -137,13 +137,18 @@ namespace SmartLock
 
         public static void AddLog(Log log)
         {
+            AddLog(log, log.Type == Log.TypeError);
+        }
+
+        public static void AddLog(Log log, bool urgent)
+        {
             logList.Add(log);
 
             // Update cache copy
             CacheManager.Store(logList, CacheManager.LogsCacheFile);
 
-            // If log is error start routine immediately
-            if (log.Type == Log.TypeError)
+            // If log is urgent start routine immediately
+            if (urgent)
             {
                 threadWaitForStop.Set();
             }
@@ -152,7 +157,7 @@ namespace SmartLock
         // Network is online event
         private static void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up! Waiting for ip...");
+            Debug.Print("Network is up!");
 
             // Start ServerRoutine
             startRoutine();
