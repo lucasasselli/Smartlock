@@ -9,13 +9,16 @@ namespace SmartLock
     internal static class SettingsManager
     {
         // Settings
-        public const int ServerIp = 0;
-        public const int ServerPort = 1;
-        public const int LockId = 2;
-        public const int MasterPin = 3;
+        public const int LockIp = 0;
+        public const int ServerIp = 1;
+        public const int ServerPort = 2;
+        public const int LockId = 3;
+        public const int MasterPin = 4;
+        public const int RoutinePeriod = 5;
+        public const int RetryPeriod = 6;
 
         // Default array
-        private static string[] defaultArray = { "192.168.1.101", "8000", "1", "0000000000"};
+        private static string[] defaultArray = { "192.168.1.110", "192.168.1.109", "8000", "1", "0000000000", "120000", "10000"};
 
         // Setting array
         private static ArrayList settingArray = new ArrayList();

@@ -12,10 +12,6 @@ namespace SmartLock
 {
     internal static class DataHelper
     {
-
-        private const int ThreadPeriodLong = 120000; // milliseconds -> 2 min
-        private const int ThreadPeriodShort = 10000; // milliseconds -> 10 sec
-
         // Data source
         public const int DataSourceUnknown = 0;
         public const int DataSourceError = 1;
@@ -49,10 +45,12 @@ namespace SmartLock
 
         public static void Init(EthernetJ11D _ethernetJ11D)
         {
+            // Load ip from settings
+            String gadgeteerIp = SettingsManager.Get(SettingsManager.LockIp);
 
             ethernetJ11D = _ethernetJ11D;
             ethernetJ11D.UseThisNetworkInterface();
-            ethernetJ11D.UseStaticIP("192.168.1.109", "255.255.255.0", "192.168.100.1");
+            ethernetJ11D.UseStaticIP(gadgeteerIp, "255.255.255.0", "192.168.100.1");
             ethernetJ11D.NetworkUp += NetworkUp;
             ethernetJ11D.NetworkDown += NetworkDown;
 
@@ -230,17 +228,22 @@ namespace SmartLock
                 }
 
                 // Plan next routine
+                string periodString;
+                int period;
                 if (success)
                 {
-                    Debug.Print("Server routine completed! Next event in " + ThreadPeriodLong);
-                    threadWaitForStop.WaitOne(ThreadPeriodLong, true);
+                    periodString = SettingsManager.Get(SettingsManager.RoutinePeriod);
+                    period = Int32.Parse(periodString);
+                    Debug.Print("Server routine completed! Next event in " + periodString);
                 }
                 else
                 {
-                    Debug.Print("Server routine failed! Next event in " + ThreadPeriodShort);
-                    threadWaitForStop.WaitOne(ThreadPeriodShort, true);
+                    periodString = SettingsManager.Get(SettingsManager.RetryPeriod);
+                    period = Int32.Parse(periodString);
+                    Debug.Print("Server routine failed! Next event in " + periodString);        
                 }
 
+                threadWaitForStop.WaitOne(period, true);
                 threadWaitForStop.Reset();
             }
         }

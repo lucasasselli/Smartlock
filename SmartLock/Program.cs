@@ -192,7 +192,9 @@ namespace SmartLock
          */
         private void UnlockDoor()
         {
-            //TODO
+            Mainboard.SetDebugLED(true);
+            System.Threading.Thread.Sleep(200);
+            Mainboard.SetDebugLED(false);
         }
 
         /*
