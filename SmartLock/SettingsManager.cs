@@ -45,7 +45,7 @@ namespace SmartLock
             }
             else
             {
-                Debug.Print("ERROR: Setting id out of bounds!");
+                DebugOnly.Print("ERROR: Setting id out of bounds!");
                 return string.Empty;
             }
         }
@@ -59,7 +59,7 @@ namespace SmartLock
             }
             else
             {
-                Debug.Print("ERROR: Setting id out of bounds!");
+                DebugOnly.Print("ERROR: Setting id out of bounds!");
                 return false;
             }
         }

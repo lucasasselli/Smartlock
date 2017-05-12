@@ -1,5 +1,6 @@
 using System;
 using Microsoft.SPOT;
+using SmartLock;
 
 namespace DateTimeExtension
 {
@@ -10,7 +11,7 @@ namespace DateTimeExtension
             return dt.ToString("dd/MM/yyyy HH:mm:ss");
         }
 
-        public static DateTime ToDateTime(this string inputString)
+        public static DateTime ToDateTime(this string inputString) 
         {
             try
             {
@@ -25,7 +26,7 @@ namespace DateTimeExtension
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while parsing datetime: " + e);
+                DebugOnly.Print("ERROR: Exception while parsing datetime: " + e);
             }
 
             return DateTime.MinValue;

@@ -39,6 +39,7 @@
   <!-- Everything below here is custom to .NET MF / Gadgeteer template-->
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
+    <Compile Include="DebugOnly.cs" />
     <Compile Include="Extensions\ArrayListExtension.cs" />
     <Compile Include="DataHelper.cs" />
     <Compile Include="Extensions\DateTimeExtension.cs" />
@@ -130,5 +131,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\alert_ok.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\data_refresh.bmp" />
   </ItemGroup>
 </Project>

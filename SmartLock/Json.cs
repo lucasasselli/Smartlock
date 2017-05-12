@@ -13,7 +13,7 @@ namespace SmartLock
 
             if (initHash == null)
             {
-                Debug.Print("ERROR: Not JSON!");
+                DebugOnly.Print("ERROR: Not JSON!");
                 return false;
             }
 
@@ -21,7 +21,7 @@ namespace SmartLock
 
             if (hashList == null)
             {
-                Debug.Print("ERROR: JSON doesn't contain array \"" + arrayName + "\"!");
+                DebugOnly.Print("ERROR: JSON doesn't contain array \"" + arrayName + "\"!");
                 return false;
             }
 
@@ -60,7 +60,7 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: exception while parsing JSON list: " + e);
+                DebugOnly.Print("ERROR: exception while parsing JSON list: " + e);
                 return false;
             }
 

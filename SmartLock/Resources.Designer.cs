@@ -38,6 +38,7 @@ namespace SmartLock
         {
             data_source_error = -26255,
             alert_alt = -24827,
+            data_refresh = -23104,
             alert_ok = -10449,
             data_source_cache = 19598,
             data_source_remote = 23262,

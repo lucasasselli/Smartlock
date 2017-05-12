@@ -221,6 +221,10 @@ namespace SmartLock.GUI
                     SetIcon(Resources.GetBytes(Resources.BinaryResources.data_source_remote));
                     break;
 
+                case DataHelper.DataSourceRefresh:
+                    SetIcon(Resources.GetBytes(Resources.BinaryResources.data_refresh));
+                    break;
+
                 default:
                     SetIcon(Resources.GetBytes(Resources.BinaryResources.data_source_error));
                     break;

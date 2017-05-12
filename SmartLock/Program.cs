@@ -28,7 +28,7 @@ namespace SmartLock
 
         public void ProgramStarted()
         {
-            Debug.Print("Program started!");
+            DebugOnly.Print("Program started!");
 
             // Event Setup
             adafruit_PN532.TagFound += TagFound;
@@ -90,7 +90,7 @@ namespace SmartLock
                     log = new Log(Log.TypeInfo, logText);
                 }
 
-                Debug.Print(logText);
+                DebugOnly.Print(logText);
 
                 // Add log to loglist
                 DataHelper.AddLog(log);
@@ -114,6 +114,8 @@ namespace SmartLock
                 cardAddedAlert.SetText("NFC card added!");
                 cardAddedAlert.SetPositiveButton("Ok", delegate { cardAddedAlert.Dismiss(); });
                 cardAddedAlert.Show();
+
+                DebugOnly.Print("Card added to user with pin \"" + pendingPin + "\"");
             }
         }
 
@@ -155,7 +157,7 @@ namespace SmartLock
                 log = new Log(Log.TypeInfo, logText);
             }
 
-            Debug.Print(logText);
+            DebugOnly.Print(logText);
 
             // Add log to loglist
             DataHelper.AddLog(log);
@@ -232,6 +234,7 @@ namespace SmartLock
          */
         private void NfcError()
         {
+            DebugOnly.Print("NFC Module is not responding!");
             Log log = new Log(Log.TypeError, "NFC Module is not responding!");
             DataHelper.AddLog(log);
         }

@@ -17,6 +17,7 @@ namespace SmartLock
         public const int DataSourceError = 1;
         public const int DataSourceCache = 2;
         public const int DataSourceRemote = 3;
+        public const int DataSourceRefresh = 4;
 
         // Event handling
         public delegate void DsChangedEventHandler(int dataSource);
@@ -60,7 +61,7 @@ namespace SmartLock
             // Load users from cache
             if (CacheManager.Load(userList, CacheManager.UsersCacheFile))
             {
-                Debug.Print(userList.Count + " users loaded from cache!");
+                DebugOnly.Print(userList.Count + " users loaded from cache!");
 
                 // Data source is now cache
                 ChangeDataSource(DataSourceCache);
@@ -77,7 +78,7 @@ namespace SmartLock
             // Load logs from cache if any
             if (CacheManager.Load(logList, CacheManager.LogsCacheFile))
             {
-                Debug.Print(logList.Count + " logs loaded from cache!");
+                DebugOnly.Print(logList.Count + " logs loaded from cache!");
             }
             else
             {
@@ -148,14 +149,14 @@ namespace SmartLock
             // If log is urgent start routine immediately
             if (urgent)
             {
-                threadWaitForStop.Set();
+                startRoutine();
             }
         }
 
         // Network is online event
         private static void NetworkUp(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is up!");
+            DebugOnly.Print("Network is up!");
 
             // Start ServerRoutine
             startRoutine();
@@ -164,7 +165,7 @@ namespace SmartLock
         // Network is offline event
         private static void NetworkDown(GTM.Module.NetworkModule sender, GTM.Module.NetworkModule.NetworkState state)
         {
-            Debug.Print("Network is down!");
+            DebugOnly.Print("Network is down!");
 
             // Data source is now cache
             if (userList.Count > 0)
@@ -190,16 +191,18 @@ namespace SmartLock
 
                 if (ethernetJ11D.IsNetworkUp)
                 {
-                    Debug.Print("Beginning server routine...");
+                    ChangeDataSource(DataSourceRefresh);
+
+                    DebugOnly.Print("Beginning server routine...");
 
                     // Check if ip is valid
                     if (String.Compare(ethernetJ11D.NetworkSettings.IPAddress, "0.0.0.0") != 0)
                     {
-                        Debug.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
+                        DebugOnly.Print("My IP is: " + ethernetJ11D.NetworkSettings.IPAddress);
                     }
                     else
                     {
-                        Debug.Print("ERROR: Current IP appears to be null!");
+                        DebugOnly.Print("ERROR: Current IP appears to be null!");
                         success = false;
                     }
 
@@ -212,7 +215,7 @@ namespace SmartLock
                     // Send logs
                     if (success && logList.Count > 0)
                     {
-                        Debug.Print(logList.Count + " stored logs must be sent to server!");
+                        DebugOnly.Print(logList.Count + " stored logs must be sent to server!");
                         success = sendLogs();
                     }
                     
@@ -224,7 +227,8 @@ namespace SmartLock
                 }
                 else
                 {
-                    Debug.Print("ERROR: No connection, skipping scheduled server polling routine.");
+                    success = false;
+                    DebugOnly.Print("ERROR: No connection, skipping scheduled server polling routine.");
                 }
 
                 // Plan next routine
@@ -234,13 +238,21 @@ namespace SmartLock
                 {
                     periodString = SettingsManager.Get(SettingsManager.RoutinePeriod);
                     period = Int32.Parse(periodString);
-                    Debug.Print("Server routine completed! Next event in " + periodString);
+                    DebugOnly.Print("Server routine completed! Next event in " + periodString);
+
+                    ChangeDataSource(DataSourceRemote);
                 }
                 else
                 {
                     periodString = SettingsManager.Get(SettingsManager.RetryPeriod);
                     period = Int32.Parse(periodString);
-                    Debug.Print("Server routine failed! Next event in " + periodString);        
+                    DebugOnly.Print("Server routine failed! Next event in " + periodString);
+
+                    // Data source is now cache
+                    if (userList.Count > 0)
+                        ChangeDataSource(DataSourceCache);
+                    else
+                        ChangeDataSource(DataSourceError);
                 }
 
                 threadWaitForStop.WaitOne(period, true);
@@ -324,7 +336,7 @@ namespace SmartLock
             string url = buildUrlFromSettings(DataRequest);
 
             // Send request
-            Debug.Print("Requesting user list to server...");
+            DebugOnly.Print("Requesting user list to server...");
             Remote.Result result = Remote.Get(url);
 
             // Parse response
@@ -341,20 +353,11 @@ namespace SmartLock
                     // Store cache copy
                     CacheManager.Store(userList, CacheManager.UsersCacheFile);
 
-                    // Data source is now remote
-                    ChangeDataSource(DataSourceRemote);
-
-                    Debug.Print(userList.Count + " users received from server");
+                    DebugOnly.Print(userList.Count + " users received from server");
                 }
                 else
                 {
-                    Debug.Print("ERROR: User list request failed!");
-
-                    // Data source is now cache
-                    if (userList.Count > 0)
-                        ChangeDataSource(DataSourceCache);
-                    else
-                        ChangeDataSource(DataSourceError);
+                    DebugOnly.Print("ERROR: User list request failed!");
                 }
             }
 
@@ -372,7 +375,7 @@ namespace SmartLock
             if (result.Success)
             {
                 // Request current time
-                Debug.Print("Requesting current time to server...");
+                DebugOnly.Print("Requesting current time to server...");
                 DateTime serverDt = result.Content.ToDateTime();
                 DateTime rtcDt = RealTimeClock.GetDateTime();
 
@@ -381,8 +384,8 @@ namespace SmartLock
                     if (!serverDt.WeakCompare(rtcDt))
                     {
                         // Found time mismatch
-                        Debug.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
-                        Debug.Print("Setting RTC...");
+                        DebugOnly.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
+                        DebugOnly.Print("Setting RTC...");
                         Log log = new Log(Log.TypeInfo, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
                         AddLog(log);
 
@@ -390,7 +393,7 @@ namespace SmartLock
                     }
                     else
                     {
-                        Debug.Print("RTC already synced with server time!");
+                        DebugOnly.Print("RTC already synced with server time!");
                     }
 
                     // RTC time is now valid
@@ -413,12 +416,12 @@ namespace SmartLock
             string url = buildUrlFromSettings(DataRequest);
 
             // Send request
-            Debug.Print("Sending logs to server...");
+            DebugOnly.Print("Sending logs to server...");
             Remote.Result result = Remote.Post(url, jsonString);
 
             if (result.Success)
             {
-                Debug.Print("Logs sent to server");
+                DebugOnly.Print("Logs sent to server");
 
                 // Log list sent to server successfully: delete loglist
                 logList.Clear();
@@ -426,7 +429,7 @@ namespace SmartLock
             }
             else
             {
-                Debug.Print("ERROR: Log sending failed!");
+                DebugOnly.Print("ERROR: Log sending failed!");
             }
 
             // Return result of the operation

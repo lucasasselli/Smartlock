@@ -34,7 +34,6 @@ namespace SmartLock.GUI
             bport.TapEvent += bport_TapEvent;
             blockid.TapEvent += blockid_TapEvent;
             bmaster.TapEvent += bmaster_TapEvent;
-            bperiod.TapEvent += bperiod_TapEvent;
             bretry.TapEvent += bretry_TapEvent;
             bperiod.TapEvent += bperiod_TapEvent;
             bclear.TapEvent += bclear_TapEvent;

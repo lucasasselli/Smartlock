@@ -190,4 +190,7 @@
   <data name="alert_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\alert_ok.jpg;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
+  <data name="data_refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\data_refresh.bmp;System.Byte[], mscorlib, Version=4.3.1.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
 </root>

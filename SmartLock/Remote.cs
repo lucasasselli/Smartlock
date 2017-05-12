@@ -14,6 +14,9 @@ namespace SmartLock
         // Request current timestamp
         public static Result Get(string url)
         {
+            DebugOnly.Print("Performing GET...");
+            DebugOnly.Print("\t\tURL: " + url);
+
             string responseString = null;
             var request = WebRequest.Create(url) as HttpWebRequest;
             try
@@ -25,7 +28,7 @@ namespace SmartLock
                         // Error
                         if (response == null || response.StatusCode != HttpStatusCode.OK)
                         {
-                            Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
+                            DebugOnly.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
                             return new Result(false, null);
                         }
 
@@ -35,7 +38,7 @@ namespace SmartLock
                         responseStream.Close();
                         responseReader.Close();
 
-                        Debug.Print("Server Response: " + responseString);
+                        DebugOnly.Print("\t\tResponse: " + responseString);
                         return new Result(true, responseString);
                         
                     }
@@ -43,7 +46,7 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while performing GET: " + e);
+                DebugOnly.Print("ERROR: Exception while performing GET: " + e);
             }
 
             return new Result(false, null);
@@ -54,6 +57,10 @@ namespace SmartLock
         {
             var request = WebRequest.Create(url) as HttpWebRequest;
             var requestByteArray = Encoding.UTF8.GetBytes(body);
+
+            DebugOnly.Print("Performing POST...");
+            DebugOnly.Print("\t\tURL: " + url);
+            DebugOnly.Print("\t\tBody: " + body);
 
             try
             {
@@ -77,7 +84,7 @@ namespace SmartLock
                         // Error
                         if (response == null || response.StatusCode != HttpStatusCode.OK)
                         {
-                            Debug.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
+                            DebugOnly.Print("ERROR: request failed. Received HTTP " + response.StatusCode);
                             return new Result(false, null);
                         }
 
@@ -91,7 +98,7 @@ namespace SmartLock
                                     responseString = reader.ReadToEnd();
                                 }
 
-                                Debug.Print("Server Response: " + responseString);
+                                DebugOnly.Print("\t\tResponse: " + responseString);
                                 return new Result(true, responseString);
                             }
                         }                     
@@ -100,7 +107,7 @@ namespace SmartLock
             }
             catch (Exception e)
             {
-                Debug.Print("ERROR: Exception while performing POST: " + e);
+                DebugOnly.Print("ERROR: Exception while performing POST: " + e);
                 return new Result(false, null);
             }
 

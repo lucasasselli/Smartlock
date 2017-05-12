@@ -56,7 +56,7 @@ namespace SmartLock.GUI
             if (lastIndex < 0)
             {
                 // Error popping empty window stack
-                Debug.Print("ERROR: Window stack is empty!");
+                DebugOnly.Print("ERROR: Window stack is empty!");
             }
             else
             {
