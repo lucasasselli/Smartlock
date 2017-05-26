@@ -201,8 +201,17 @@ namespace SmartLock
         private static bool FileExists(string file)
         {
             // Check if file exists
-            var root = sdCard.StorageDevice.RootDirectory;
-            var foundFiles = sdCard.StorageDevice.ListFiles(root);
+            String root;
+            String[] foundFiles;
+            try
+            {
+                root = sdCard.StorageDevice.RootDirectory;
+                foundFiles = sdCard.StorageDevice.ListFiles(root);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             var exist = false;
             foreach (var aFile in foundFiles)

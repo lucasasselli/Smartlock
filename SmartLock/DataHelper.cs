@@ -416,30 +416,28 @@ namespace SmartLock
                 // Request current time
                 DebugOnly.Print("Requesting current time to server...");
                 DateTime serverDt = result.Content.ToDateTime();
-                DateTime rtcDt = RealTimeClock.GetDateTime();
 
-                if (DateTime.Compare(serverDt, DateTime.MinValue) != 0)
+                DateTime rtcDt = Utils.SafeRtc();
+
+                if (!serverDt.WeakCompare(rtcDt))
                 {
-                    if (!serverDt.WeakCompare(rtcDt))
-                    {
-                        // Found time mismatch
-                        DebugOnly.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
-                        DebugOnly.Print("Setting RTC...");
-                        Log log = new Log(Log.TypeInfo, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
-                        AddLog(log);
+                    // Found time mismatch
+                    DebugOnly.Print("ERROR: RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
+                    DebugOnly.Print("Setting RTC...");
+                    Log log = new Log(Log.TypeInfo, "RTC/Server time mismatch! Server: " + serverDt.ToMyString() + ", RTC: " + rtcDt.ToMyString());
+                    AddLog(log);
 
-                        RealTimeClock.SetDateTime(serverDt);
-                    }
-                    else
-                    {
-                        DebugOnly.Print("RTC already synced with server time!");
-                    }
-
-                    // RTC time is now valid
-                    timeChecked = true;
-
-                    return true;
+                    RealTimeClock.SetDateTime(serverDt);
                 }
+                else
+                {
+                    DebugOnly.Print("RTC already synced with server time!");
+                }
+
+                // RTC time is now valid
+                timeChecked = true;
+
+                return true;
             }
 
             return false;

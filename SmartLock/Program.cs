@@ -30,30 +30,19 @@ namespace SmartLock
         MaintenanceWindow maintenanceWindow = new MaintenanceWindow();
 
         // Door
-        private const int authPeriod = 10000;
+        private const int unlockPeriod = 60000;
         private bool authorizedAccess = false;
         private bool doorOpen = false;
-        private bool authTimerRunning = false;
-        private GT.Timer authTimer;
+        private bool unlockTimerRunning = false;
+        private bool pendingUnlockError = false;
+        private GT.Timer unlockedTimer;
 
         public void ProgramStarted()
         {
             DebugOnly.Print("Program started!");
 
-            // Event Setup
-            adafruit_PN532.TagFound += TagFound;
-            adafruit_PN532.Error += NfcError;
-            pinWindow.PinFound += PinFound;
-            DataHelper.DataSourceChanged += DataSourceChanged;
-            WindowManager.WindowChanged += WindowChanged;
-
-            //Init
-            CacheManager.Init(sdCard);
-            SettingsManager.Init();
-            DataHelper.Init(ethernetJ11D);
+            // Initialize screen
             WindowManager.Init();
-
-            adafruit_PN532.Init();
 
             // Set scan window
             scanWindow.SetText("Please scan your NFC card now...");
@@ -77,11 +66,27 @@ namespace SmartLock
                 pinWindow.SetText("Door closed");
             }
 
-            authTimer = new GT.Timer(authPeriod);
-            authTimer.Tick += AuthTimeout;
+            unlockedTimer = new GT.Timer(unlockPeriod);
+            unlockedTimer.Tick += UnlockTimeout;
 
             pinWindow.Show();
 
+            // Event Setup
+            adafruit_PN532.TagFound += TagFound;
+            adafruit_PN532.Error += NfcError;
+            pinWindow.PinFound += PinFound;
+            DataHelper.DataSourceChanged += DataSourceChanged;
+            WindowManager.WindowChanged += WindowChanged;
+
+            // Start NFC
+            adafruit_PN532.StartScan(NfcScanPeriod, NfcScanTimeout);
+
+            //Init
+            CacheManager.Init(sdCard);
+            SettingsManager.Init();
+            DataHelper.Init(ethernetJ11D);
+          
+            adafruit_PN532.Init();
         }
 
         /*
@@ -224,9 +229,8 @@ namespace SmartLock
             // Authorize access
             authorizedAccess = true;
 
-            // Start timer
-            authTimer.Restart();
-            authTimerRunning = true;
+            unlockTimerRunning = true;
+            unlockedTimer.Restart();
 
             // Blink LED
             Mainboard.SetDebugLED(true);
@@ -241,14 +245,6 @@ namespace SmartLock
         private void DataSourceChanged(int dataSource)
         {
             pinWindow.SetDataSource(dataSource);
-            if (dataSource == DataHelper.DataSourceError)
-            {
-                var dataSourceAlert = new AlertWindow(WindowAlertPeriod);
-                dataSourceAlert.SetText(
-                    "Unable to load dataset from cache! The system will remain offline until connection is established.");
-                dataSourceAlert.SetPositiveButton("Ok", delegate { dataSourceAlert.Dismiss(); });
-                dataSourceAlert.Show();
-            }
         }
 
         /*
@@ -301,21 +297,36 @@ namespace SmartLock
             pinWindow.SetText("Door closed");
             DebugOnly.Print("Door closed!");
 
-            authTimerRunning = false;
-            authTimer.Stop();
+            // Stop timer
+            unlockTimerRunning = false;
+            unlockedTimer.Stop();
+
+            // Log if there is a pending error
+            if (pendingUnlockError)
+            {
+                pendingUnlockError = false;
+                DebugOnly.Print("Door finally closed");
+                DataHelper.AddLog(new Log(Log.TypeError, "Door finally closed"));
+            }
         }
 
-        private void AuthTimeout(GT.Timer timerAccessWindow)
+        private void UnlockTimeout(GT.Timer timerAccessWindow)
         {
-            if (authTimerRunning)
+            if (unlockTimerRunning)
             {
+
                 authorizedAccess = false;
 
-                authTimerRunning = false;
-                authTimer.Stop();
+                // Stop timer
+                unlockTimerRunning = false;
+                unlockedTimer.Stop();
 
-                DebugOnly.Print("Authorization timeout! User in no longer authorized.");
-                DataHelper.AddLog(new Log(Log.TypeInfo, "Access was authorized but the user didn't open the door."));
+                // New pending unlock error
+                pendingUnlockError = true;
+
+                // Send log
+                DebugOnly.Print("Unlock timeout! Door is not closed!!!");
+                DataHelper.AddLog(new Log(Log.TypeError, "Unlock timeout! Door is not closed!!!"));
             }
         }
     }

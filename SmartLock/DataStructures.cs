@@ -38,14 +38,14 @@ namespace SmartLock
             Pin = pin;
             CardID = cardId;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToMyString();
+            DateTime = Utils.SafeRtc().ToMyString();
         }
 
         public Log(int type, string text)
         {
             Type = type;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToMyString();
+            DateTime = Utils.SafeRtc().ToMyString();
         }
 
         public Log(int type, string pin, string text)
@@ -53,7 +53,7 @@ namespace SmartLock
             Type = type;
             Pin = pin;
             Text = text;
-            DateTime = RealTimeClock.GetDateTime().ToMyString();
+            DateTime = Utils.SafeRtc().ToMyString();
         }
     } 
 }
