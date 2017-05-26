@@ -88,6 +88,10 @@ namespace SmartLock.GUI
         public void SetText(string textString)
         {
             text.Visible = true;
+
+            // Overdraws a white ractangle
+            Window.FillRect(text.Rect);
+
             text.Text = textString;
             text.Invalidate();
         }

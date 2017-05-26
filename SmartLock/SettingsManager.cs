@@ -18,7 +18,7 @@ namespace SmartLock
         public const int RetryPeriod = 6;
 
         // Default array
-        private static string[] defaultArray = { "192.168.1.110", "192.168.1.109", "8000", "1", "0000000000", "120000", "10000"};
+        private static string[] defaultArray = { "192.168.1.109", "192.168.1.110", "8000", "1", "0000000000", "120000", "10000"};
 
         // Setting array
         private static ArrayList settingArray = new ArrayList();

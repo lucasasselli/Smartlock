@@ -2,6 +2,9 @@
 using Microsoft.SPOT;
 using GHI.Glide;
 using SmartLock.GUI;
+using Gadgeteer.Modules.GHIElectronics;
+using Gadgeteer.Modules.Luca_Sasselli;
+using GT = Gadgeteer;
 
 namespace SmartLock
 {
@@ -25,6 +28,13 @@ namespace SmartLock
         AccessWindow accessWindow = new AccessWindow(WindowAccessPeriod);
         AlertWindow scanWindow = new AlertWindow(WindowAlertPeriod);
         MaintenanceWindow maintenanceWindow = new MaintenanceWindow();
+
+        // Door
+        private const int authPeriod = 10000;
+        private bool authorizedAccess = false;
+        private bool doorOpen = false;
+        private bool authTimerRunning = false;
+        private GT.Timer authTimer;
 
         public void ProgramStarted()
         {
@@ -52,6 +62,23 @@ namespace SmartLock
             // Windows and window manager
             pinWindow.Id = WindowPinId;
             scanWindow.Id = WindowScanId;
+
+            // Button
+            button.ButtonPressed += DoorOpen;
+            button.ButtonReleased += DoorClosed;
+
+            doorOpen = button.Pressed;
+            if (doorOpen)
+            {
+                pinWindow.SetText("Door open");
+            }
+            else
+            {
+                pinWindow.SetText("Door closed");
+            }
+
+            authTimer = new GT.Timer(authPeriod);
+            authTimer.Tick += AuthTimeout;
 
             pinWindow.Show();
 
@@ -194,6 +221,14 @@ namespace SmartLock
          */
         private void UnlockDoor()
         {
+            // Authorize access
+            authorizedAccess = true;
+
+            // Start timer
+            authTimer.Restart();
+            authTimerRunning = true;
+
+            // Blink LED
             Mainboard.SetDebugLED(true);
             System.Threading.Thread.Sleep(200);
             Mainboard.SetDebugLED(false);
@@ -237,6 +272,51 @@ namespace SmartLock
             DebugOnly.Print("NFC Module is not responding!");
             Log log = new Log(Log.TypeError, "NFC Module is not responding!");
             DataHelper.AddLog(log);
+        }
+
+        private void DoorOpen(Button sender, Button.ButtonState state)
+        {
+            doorOpen = true;
+
+            pinWindow.SetText("Door open");
+            DebugOnly.Print("Door open!");
+
+            if (!authorizedAccess)
+            {
+                // Security breach
+                DebugOnly.Print("Security breach! Unauthorized access!");
+                DataHelper.AddLog(new Log(Log.TypeError, "Security breach! Unauthorized access!"));
+
+                var breachWindow = new AlertWindow(20000);
+                breachWindow.SetText("BREACH ALERT!!! \n UNAUTHORIZED ACCESS!!! \n\n\n\n Please contact the administrator immediately.");
+                breachWindow.Show();
+            }
+        }
+
+        private void DoorClosed(Button sender, Button.ButtonState state)
+        {
+            authorizedAccess = false;
+            doorOpen = false;
+
+            pinWindow.SetText("Door closed");
+            DebugOnly.Print("Door closed!");
+
+            authTimerRunning = false;
+            authTimer.Stop();
+        }
+
+        private void AuthTimeout(GT.Timer timerAccessWindow)
+        {
+            if (authTimerRunning)
+            {
+                authorizedAccess = false;
+
+                authTimerRunning = false;
+                authTimer.Stop();
+
+                DebugOnly.Print("Authorization timeout! User in no longer authorized.");
+                DataHelper.AddLog(new Log(Log.TypeInfo, "Access was authorized but the user didn't open the door."));
+            }
         }
     }
 }

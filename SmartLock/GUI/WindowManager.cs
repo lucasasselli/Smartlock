@@ -64,9 +64,17 @@ namespace SmartLock.GUI
                 windowStack.RemoveAt(lastIndex);
 
                 // Show previous window
-                ManageableWindow manageable = windowStack[lastIndex - 1] as ManageableWindow;
-                Glide.MainWindow = manageable.Window;
-                notifyChanged(manageable);
+                if (lastIndex - 1 >= 0)
+                {
+                    ManageableWindow manageable = windowStack[lastIndex - 1] as ManageableWindow;
+                    Glide.MainWindow = manageable.Window;
+                    notifyChanged(manageable);
+                }
+                else
+                {
+
+                    DebugOnly.Print("ERROR: Window stack has only one element!");
+                }
             }
         }
 

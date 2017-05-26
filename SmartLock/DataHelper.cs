@@ -19,6 +19,8 @@ namespace SmartLock
         public const int DataSourceRemote = 3;
         public const int DataSourceRefresh = 4;
 
+        private static bool initialized = false;
+
         // Event handling
         public delegate void DsChangedEventHandler(int dataSource);
         public static event DsChangedEventHandler DataSourceChanged;
@@ -85,71 +87,108 @@ namespace SmartLock
                 // Clear log list
                 logList.Clear();
             }
+
+            initialized = true;
+        }
+
+        // Check if the class is initialized
+        public static bool IsInitialized()
+        {
+            return initialized;
         }
 
         // Access Management
         public static bool CheckCardId(string cardId)
         {
-            foreach (User user in userList)
-                if (string.Compare(cardId, user.CardID) == 0)
-                    return true;
+            if (initialized)
+            {
+                foreach (User user in userList)
+                    if (string.Compare(cardId, user.CardID) == 0)
+                        return true;
 
-            return false;
+                return false;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static bool CheckPin(string pin)
         {
-            foreach (User user in userList)
-                if (string.Compare(pin, user.Pin) == 0)
-                    return true;
+            if (initialized)
+            {
+                foreach (User user in userList)
+                    if (string.Compare(pin, user.Pin) == 0)
+                        return true;
 
-            return false;
+                return false;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static bool PinHasNullCardId(string pin)
         {
-            foreach (User user in userList)
-                if (string.Compare(pin, user.Pin) == 0)
-                    if (user.CardID != null)
-                        if (string.Compare(string.Empty, user.CardID) == 0)
-                            return true;
+            if (initialized)
+            {
+                foreach (User user in userList)
+                    if (string.Compare(pin, user.Pin) == 0)
+                        if (user.CardID != null)
+                            if (string.Compare(string.Empty, user.CardID) == 0)
+                                return true;
+                            else
+                                return false;
                         else
-                            return false;
-                    else
-                        return true;
+                            return true;
 
-            return false;
+                return false;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static void AddCardId(string pin, string cardId)
         {
-            foreach (User user in userList)
-                if (user.Pin == pin)
-                {
-                    user.CardID = cardId;
-                    break;
-                }
+            if (initialized)
+            {
+                foreach (User user in userList)
+                    if (user.Pin == pin)
+                    {
+                        user.CardID = cardId;
+                        break;
+                    }
 
-            // Update cache copy
-            CacheManager.Store(userList, CacheManager.UsersCacheFile);
+                // Update cache copy
+                CacheManager.Store(userList, CacheManager.UsersCacheFile);
+            }
         }
 
         public static void AddLog(Log log)
         {
-            AddLog(log, log.Type == Log.TypeError);
+            if (initialized)
+            {
+                AddLog(log, log.Type == Log.TypeError);
+            }
         }
 
         public static void AddLog(Log log, bool urgent)
         {
-            logList.Add(log);
+            if (initialized) { 
+                logList.Add(log);
 
-            // Update cache copy
-            CacheManager.Store(logList, CacheManager.LogsCacheFile);
+                // Update cache copy
+                CacheManager.Store(logList, CacheManager.LogsCacheFile);
 
-            // If log is urgent start routine immediately
-            if (urgent)
-            {
-                startRoutine();
+                // If log is urgent start routine immediately
+                if (urgent)
+                {
+                    startRoutine();
+                }
             }
         }
 

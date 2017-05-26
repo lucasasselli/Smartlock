@@ -9,11 +9,14 @@ namespace SmartLock
 {
     internal static class CacheManager
     {
-        private const int mountAttempts = 10;
-        private const int mountAttemptPeriod = 100;
+        private const int mountAttempts = 3;
+        private const int mountAttemptPeriod = 50;
         public const string UsersCacheFile = "users";
         public const string LogsCacheFile = "logs";
         public const string SettingsFile = "settings";
+
+        public static bool mountErrorFlag = false;
+        public static bool slotErrorFlag = false;
 
         private static SDCard sdCard;
 
@@ -152,6 +155,16 @@ namespace SmartLock
             if (!sdCard.IsCardInserted)
             {
                 DebugOnly.Print("ERROR: SD slot is empty!");
+
+                if (!slotErrorFlag)
+                {
+                    // First slot error, send it
+                    if (DataHelper.IsInitialized())
+                    {
+                        slotErrorFlag = true; // Leave it here, otherwise it's recursive!!!
+                        DataHelper.AddLog(new Log(Log.TypeError, "SD Card slot is empty!"));
+                    }
+                }
                 return false;
             }
 
@@ -166,10 +179,22 @@ namespace SmartLock
                     System.Threading.Thread.Sleep(mountAttemptPeriod);
                 }
 
+                // Mounting error
                 DebugOnly.Print("ERROR: Mounting failed!");
+                if (!mountErrorFlag)
+                {
+                    // First mount error, send it
+                    if (DataHelper.IsInitialized())
+                    {
+                        DataHelper.AddLog(new Log(Log.TypeError, "Unable to mount SDcard!"));
+                        mountErrorFlag = true;
+                    }
+                }
                 return false;
             }
 
+            slotErrorFlag = false;
+            mountErrorFlag = false;
             return true;
         }
 
